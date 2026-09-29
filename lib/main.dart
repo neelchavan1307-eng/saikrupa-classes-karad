@@ -103,7 +103,6 @@ class DashboardView extends StatelessWidget {
     return Padding(padding: EdgeInsets.all(16), child: Column(children: [
       Container(padding: EdgeInsets.all(20), decoration: BoxDecoration(color: Colors.deepOrange, borderRadius: BorderRadius.circular(16)), child: Column(children: [
         Text('Saikrupa Classes', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-        Text('Karad', style: TextStyle(color: Colors.white70)),
         SizedBox(height: 10),
         Text('🙏 Vidya Vinayen Shobhate 🙏', style: TextStyle(color: Colors.white)),
       ])),
