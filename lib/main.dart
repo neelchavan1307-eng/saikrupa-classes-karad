@@ -11,10 +11,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomePage(),
-    );
+    return const MaterialApp(debugShowCheckedModeBanner: false, home: HomePage());
   }
 }
 
@@ -43,14 +40,11 @@ class _HomePageState extends State<HomePage> {
   String profileAddr = "Malakapur, Karad";
   String profilePhone = "90220022XX";
   String? profileImageBase64;
-  final monthsShort = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
-  final monthsFull = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  final monthsShort = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+  final monthsFull = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
   @override
-  void initState() {
-    super.initState();
-    loadAll();
-  }
+  void initState() { super.initState(); loadAll(); }
 
   Future<void> loadAll() async {
     final p = await SharedPreferences.getInstance();
@@ -63,7 +57,7 @@ class _HomePageState extends State<HomePage> {
     String? d = p.getString('students_pro');
     if (d!= null) {
       List l = jsonDecode(d);
-      setState(() => students = l.map((e) => Student.fromJson(e)).toList());
+      setState(() { students = l.map((e) => Student.fromJson(e)).toList(); });
     }
   }
 
@@ -81,7 +75,7 @@ class _HomePageState extends State<HomePage> {
     final XFile? img = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (img!= null) {
       final bytes = await img.readAsBytes();
-      setState(() => profileImageBase64 = base64Encode(bytes));
+      setState(() { profileImageBase64 = base64Encode(bytes); });
       saveAll();
     }
   }
@@ -91,12 +85,11 @@ class _HomePageState extends State<HomePage> {
     showDialog(context: context, builder: (c) => AlertDialog(
       title: const Text('Profile Edit'),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        GestureDetector(onTap: pickImage, child: CircleAvatar(radius: 40, backgroundImage: profileImageBase64!= null? MemoryImage(base64Decode(profileImageBase64!)) : null, child: profileImageBase64 == null? const Icon(Icons.camera_alt) : null)),
-        const SizedBox(height: 5),
-        const Text('DP var click kara', style: TextStyle(fontSize: 11)),
-        TextField(decoration: const InputDecoration(labelText: 'Name'), controller: TextEditingController(text: n), onChanged: (v) => n = v),
-        TextField(decoration: const InputDecoration(labelText: 'Address'), controller: TextEditingController(text: a), onChanged: (v) => a = v),
-        TextField(decoration: const InputDecoration(labelText: 'Mobile'), controller: TextEditingController(text: ph), onChanged: (v) => ph = v),
+        GestureDetector(onTap: pickImage, child: CircleAvatar(radius: 35, backgroundImage: profileImageBase64!= null? MemoryImage(base64Decode(profileImageBase64!)) : null, child: profileImageBase64 == null? const Icon(Icons.camera_alt) : null)),
+        const SizedBox(height: 6),
+        TextField(controller: TextEditingController(text: n), decoration: const InputDecoration(labelText: 'Name'), onChanged: (v) => n = v),
+        TextField(controller: TextEditingController(text: a), decoration: const InputDecoration(labelText: 'Address'), onChanged: (v) => a = v),
+        TextField(controller: TextEditingController(text: ph), decoration: const InputDecoration(labelText: 'Mobile'), onChanged: (v) => ph = v),
       ]),
       actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text('Cancel')), ElevatedButton(onPressed: () { setState(() { profileName = n; profileAddr = a; profilePhone = ph; }); saveAll(); Navigator.pop(c); }, child: const Text('Save'))],
     ));
@@ -106,44 +99,32 @@ class _HomePageState extends State<HomePage> {
     String name = "", phone = "";
     int fee = 500;
     DateTime joinDate = DateTime.now();
-    showDialog(context: context, builder: (c) => StatefulBuilder(builder: (ctx, setD) => AlertDialog(
+    showDialog(context: context, builder: (c) => AlertDialog(
       title: const Text('Navin Vidyarthi'),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(decoration: const InputDecoration(labelText: 'Nav'), onChanged: (v) => name = v),
         TextField(decoration: const InputDecoration(labelText: 'Contact'), keyboardType: TextInputType.phone, onChanged: (v) => phone = v),
         TextField(decoration: const InputDecoration(labelText: 'Amount'), controller: TextEditingController(text: "500"), keyboardType: TextInputType.number, onChanged: (v) => fee = int.tryParse(v)?? 500),
         const SizedBox(height: 10),
-        Row(children: [
-          Text(DateFormat('dd-MM-yyyy').format(joinDate)),
-          IconButton(icon: const Icon(Icons.calendar_today), onPressed: () async {
-            DateTime? d = await showDatePicker(context: context, initialDate: joinDate, firstDate: DateTime(2020), lastDate: DateTime(2030));
-            if (d!= null) setD(() => joinDate = d);
-          })
-        ])
+        Text("Join: ${DateFormat('dd-MM-yyyy').format(joinDate)}"),
       ]),
       actions: [
         TextButton(onPressed: () => Navigator.pop(c), child: const Text('Cancel')),
-        ElevatedButton(onPressed: () {
-          if (name.isNotEmpty) {
-            setState(() => students.add(Student(name: name, phone: phone, monthlyFee: fee, joiningDate: joinDate, months: List.filled(12, false))));
-            saveAll();
-            Navigator.pop(c);
-          }
-        }, child: const Text('Add'))
+        ElevatedButton(onPressed: () { if (name.isNotEmpty) { setState(() { students.add(Student(name: name, phone: phone, monthlyFee: fee, joiningDate: joinDate, months: List.filled(12, false))); }); saveAll(); Navigator.pop(c); } }, child: const Text('Add')),
       ],
-    )));
+    ));
   }
 
   void sendReceipt(Student s, int mi) async {
-    String msg = "*$profileName*\n*Fee Receipt*\n\nVidhyarthi: ${s.name}\nMahina: ${monthsFull[mi]}\nAmount: Rs.${s.monthlyFee}\nDate: ${DateFormat('dd-MM-yyyy').format(DateTime.now())}\nPaid: Rs.${s.paidAmount} | Baki: Rs.${s.balance}";
-    final url = Uri.parse("https://wa.me/91${s.phone}?text=${Uri.encodeComponent(msg)}");
+    String fullMsg = "*$profileName*\n*Fee Receipt*\n\nVidhyarthi: ${s.name}\nMahina: ${monthsFull[mi]}\nAmount: Rs.${s.monthlyFee}\nDate: ${DateFormat('dd-MM-yyyy').format(DateTime.now())}\n\nPaid: Rs.${s.paidAmount} | Baki: Rs.${s.balance}";
+    final url = Uri.parse("https://wa.me/91${s.phone}?text=${Uri.encodeComponent(fullMsg)}");
     if (await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
   void sendReminder(Student s) async {
     int cm = DateTime.now().month - 1;
-    String msg = "Namaskar ${s.name} Palak,\n${monthsFull[cm]} chi fee Rs.${s.monthlyFee} baki aahe.\nEkun Baki: Rs.${s.balance}\n- $profileName";
-    final url = Uri.parse("https://wa.me/91${s.phone}?text=${Uri.encodeComponent(msg)}");
+    String fullMsg = "Namaskar ${s.name} Palak,\n${monthsFull[cm]} chi fee Rs.${s.monthlyFee} baki aahe.\nBaki: Rs.${s.balance}\n- $profileName";
+    final url = Uri.parse("https://wa.me/91${s.phone}?text=${Uri.encodeComponent(fullMsg)}");
     if (await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
@@ -155,53 +136,44 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
-      body: SafeArea(child: SingleChildScrollView(child: Column(children: [
-        Container(color: Colors.white, padding: const EdgeInsets.all(16), child: Column(children: [
+      appBar: AppBar(title: Text(profileName), backgroundColor: Colors.white, actions: [IconButton(onPressed: editProfile, icon: const Icon(Icons.edit))]),
+      body: Column(children: [
+        Container(color: Colors.white, padding: const EdgeInsets.all(12), child: Column(children: [
           Row(children: [
-            GestureDetector(onTap: editProfile, child: CircleAvatar(radius: 28, backgroundColor: Colors.orange.shade100, backgroundImage: profileImageBase64!= null? MemoryImage(base64Decode(profileImageBase64!)) : null, child: profileImageBase64 == null? Text(profileName[0], style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.deepOrange)) : null)),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(profileName, style: const TextStyle(fontWeight: FontWeight.bold)), Text(profileAddr, style: const TextStyle(fontSize: 12, color: Colors.grey)), Text(profilePhone, style: const TextStyle(fontSize: 11))])),
-            IconButton(onPressed: editProfile, icon: const Icon(Icons.edit))
+            GestureDetector(onTap: editProfile, child: CircleAvatar(radius: 26, backgroundImage: profileImageBase64!= null? MemoryImage(base64Decode(profileImageBase64!)) : null, backgroundColor: Colors.orange.shade100, child: profileImageBase64 == null? Text(profileName[0]) : null)),
+            const SizedBox(width: 10),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(profileName, style: const TextStyle(fontWeight: FontWeight.bold)), Text(profileAddr, style: const TextStyle(fontSize: 11, color: Colors.grey)), Text(profilePhone, style: const TextStyle(fontSize: 10))])),
           ]),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(children: [
-            Expanded(child: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFFFFE0B2), borderRadius: BorderRadius.circular(10)), child: Column(children: [Text("${students.length}", style: const TextStyle(fontWeight: FontWeight.bold)), const Text("विद्यार्थी", style: TextStyle(fontSize: 10))])))),
-            const SizedBox(width: 8),
-            Expanded(child: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFFC8E6C9), borderRadius: BorderRadius.circular(10)), child: Column(children: [Text("Rs.$totalPaid", style: const TextStyle(fontWeight: FontWeight.bold)), const Text("जमा", style: TextStyle(fontSize: 10))])))),
-            const SizedBox(width: 8),
-            Expanded(child: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFFFFCDD2), borderRadius: BorderRadius.circular(10)), child: Column(children: [Text("Rs.$totalBal", style: const TextStyle(fontWeight: FontWeight.bold)), const Text("बाकी", style: TextStyle(fontSize: 10))])))),
-          ])
+            Expanded(child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFFFFE0B2), borderRadius: BorderRadius.circular(8)), child: Column(children: [Text("${students.length}", style: const TextStyle(fontWeight: FontWeight.bold)), const Text("Students", style: TextStyle(fontSize: 10))]))),
+            const SizedBox(width: 6),
+            Expanded(child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFFC8E6C9), borderRadius: BorderRadius.circular(8)), child: Column(children: [Text("Rs.$totalPaid", style: const TextStyle(fontWeight: FontWeight.bold)), const Text("Jama", style: TextStyle(fontSize: 10))]))),
+            const SizedBox(width: 6),
+            Expanded(child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFFFFCDD2), borderRadius: BorderRadius.circular(8)), child: Column(children: [Text("Rs.$totalBal", style: const TextStyle(fontWeight: FontWeight.bold)), const Text("Baki", style: TextStyle(fontSize: 10))]))),
+          ]),
         ])),
-        Container(color: Colors.white, padding: const EdgeInsets.all(8), child: TextField(decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: 'Search...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))), onChanged: (v) => setState(() => search = v))),
-        SingleChildScrollView(scrollDirection: Axis.horizontal, child: Column(children: [
-          Container(color: const Color(0xFF1E1E2F), width: 1100, padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8), child: Row(children: [
-            const SizedBox(width: 120, child: Text('नाव', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))),
-            const SizedBox(width: 100, child: Text('कॉन्टॅक्ट', style: TextStyle(color: Colors.white, fontSize: 11))),
-            const SizedBox(width: 60, child: Text('अमाउंट', style: TextStyle(color: Colors.white, fontSize: 11))),
-            const SizedBox(width: 80, child: Text('जॉइनिंग', style: TextStyle(color: Colors.white, fontSize: 11))),
-           ...monthsShort.map((m) => Container(width: 36, margin: const EdgeInsets.symmetric(horizontal: 2), child: Center(child: Text(m, style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold))))),
-            const SizedBox(width: 50, child: Text('रिसीट', style: TextStyle(color: Colors.white, fontSize: 11))),
-            const SizedBox(width: 60, child: Text('रिमाइंड', style: TextStyle(color: Colors.white, fontSize: 11))),
+        Container(color: Colors.white, padding: const EdgeInsets.all(8), child: TextField(decoration: InputDecoration(prefixIcon: const Icon(Icons.search), hintText: 'Search...', border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))), onChanged: (v) => setState(() => search = v))),
+        Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: SingleChildScrollView(child: Column(children: [
+          Container(color: const Color(0xFF1E1E2F), width: 1050, padding: const EdgeInsets.all(10), child: Row(children: [
+            const SizedBox(width: 110, child: Text('Nav', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
+            const SizedBox(width: 90, child: Text('Contact', style: TextStyle(color: Colors.white, fontSize: 11))),
+            const SizedBox(width: 55, child: Text('Fee', style: TextStyle(color: Colors.white, fontSize: 11))),
+            const SizedBox(width: 75, child: Text('Join', style: TextStyle(color: Colors.white, fontSize: 11))),
+           ...monthsShort.map((m) => Container(width: 34, margin: const EdgeInsets.symmetric(horizontal: 2), child: Center(child: Text(m, style: const TextStyle(color: Colors.white70, fontSize: 12))))),
+            const SizedBox(width: 45, child: Text('Rec', style: TextStyle(color: Colors.white, fontSize: 11))),
+            const SizedBox(width: 60, child: Text('Rem', style: TextStyle(color: Colors.white, fontSize: 11))),
           ])),
          ...filtered.map((s) {
             int idx = students.indexOf(s);
-            return Container(color: Colors.white, width: 1100, margin: const EdgeInsets.only(bottom: 1), padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8), child: Row(children: [
-              SizedBox(width: 120, child: Text(s.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-              SizedBox(width: 100, child: Text(s.phone, style: const TextStyle(fontSize: 11))),
-              SizedBox(width: 60, child: Text('Rs.${s.monthlyFee}', style: const TextStyle(fontSize: 11))),
-              SizedBox(width: 80, child: Text(DateFormat('dd-MM-yy').format(s.joiningDate), style: const TextStyle(fontSize: 10))),
+            return Container(color: Colors.white, width: 1050, margin: const EdgeInsets.only(bottom: 1), padding: const EdgeInsets.all(8), child: Row(children: [
+              SizedBox(width: 110, child: Text(s.name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
+              SizedBox(width: 90, child: Text(s.phone, style: const TextStyle(fontSize: 11))),
+              SizedBox(width: 55, child: Text('Rs.${s.monthlyFee}', style: const TextStyle(fontSize: 11))),
+              SizedBox(width: 75, child: Text(DateFormat('dd-MM-yy').format(s.joiningDate), style: const TextStyle(fontSize: 10))),
              ...List.generate(12, (mi) {
                 bool ok = s.months[mi];
-                return GestureDetector(onTap: () { setState(() => students[idx].months[mi] =!students[idx].months[mi]); saveAll(); }, child: Container(width: 36, height: 28, margin: const EdgeInsets.symmetric(horizontal: 2), decoration: BoxDecoration(color: ok? Colors.green : Colors.red.shade300, borderRadius: BorderRadius.circular(6)), child: Icon(ok? Icons.check : Icons.close, size: 16, color: Colors.white)));
+                return GestureDetector(onTap: () { setState(() { students[idx].months[mi] =!students[idx].months[mi]; }); saveAll(); }, child: Container(width: 34, height: 26, margin: const EdgeInsets.symmetric(horizontal: 2), decoration: BoxDecoration(color: ok? Colors.green : Colors.red.shade300, borderRadius: BorderRadius.circular(5)), child: Icon(ok? Icons.check : Icons.close, size: 14, color: Colors.white)));
               }),
-              SizedBox(width: 50, child: IconButton(icon: const Icon(Icons.receipt, size: 20, color: Colors.blue), onPressed: () { int last = s.months.lastIndexWhere((e) => e); if (last!= -1) sendReceipt(s, last); })),
-              SizedBox(width: 60, child: ElevatedButton(onPressed: () => sendReminder(s), style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(4), backgroundColor: Colors.orange), child: const Text('Remind', style: TextStyle(fontSize: 9, color: Colors.white)))),
-            ]));
-          }).toList(),
-        ])),
-        const SizedBox(height: 100),
-      ]))),
-      floatingActionButton: FloatingActionButton.extended(onPressed: addStudent, label: const Text('Add Student'), icon: const Icon(Icons.add), backgroundColor: Colors.deepOrange, foregroundColor: Colors.white),
-    );
-  }
-}
+              SizedBox(width: 45, child: IconButton(icon: const Icon(Icons.receipt, size: 18, color: Colors.blue), onPressed: () { int last = s.months.lastIndexWhere((e) => e); if (last!= -1) sendReceipt(s, last); })),
+              SizedBox(width: 60, child: ElevatedButton(onPressed: () => send
