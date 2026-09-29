@@ -8,7 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Saikrupa Classes - Karad',
+      title: 'Saikrupa Classes ',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.deepOrange, useMaterial3: true),
       home: HomePage(),
@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
     int totalCollection = students.fold(0, (s,e)=>s+e.paidFee);
     int totalPending = students.fold(0, (s,e)=>s+e.remaining);
     return Scaffold(
-      appBar: AppBar(title: Text('Saikrupa Classes - Karad'), backgroundColor: Colors.deepOrange, foregroundColor: Colors.white),
+      appBar: AppBar(title: Text('Saikrupa Classes - '), backgroundColor: Colors.deepOrange, foregroundColor: Colors.white),
       body: _index==0 ? DashboardView(totalCollection: totalCollection, totalPending: totalPending, count: students.length)
           : ListView.builder(itemCount: students.length, itemBuilder: (c,i){
         final s = students[i];
