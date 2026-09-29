@@ -54,7 +54,7 @@ class _HomePageState extends State<HomePage> {
       title: Text('Navin Vidyarthi'),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(decoration: InputDecoration(labelText: 'Nav'), onChanged: (v)=>name=v),
-        TextField(decoration: InputDecoration(labelText: 'Iyatta (4th, 10th)'), onChanged: (v)=>std=v),
+        TextField(decoration: InputDecoration(labelText: 'Iyatta'), onChanged: (v)=>std=v),
         TextField(decoration: InputDecoration(labelText: 'Mobile'), keyboardType: TextInputType.phone, onChanged: (v)=>phone=v),
         TextField(decoration: InputDecoration(labelText: 'Monthly Fee'), keyboardType: TextInputType.number, controller: TextEditingController(text: "500"), onChanged: (v)=> fee=int.tryParse(v)??500),
       ]),
@@ -69,12 +69,10 @@ class _HomePageState extends State<HomePage> {
     int totalBalance = students.fold(0, (sum, s)=> sum + s.balance);
     int unpaidStudents = students.where((s)=> s.balance > 0).length;
     List<Student> filtered = students.where((s)=> s.name.toLowerCase().contains(search.toLowerCase())).toList();
-
     return Scaffold(
       backgroundColor: Color(0xFFF8F8F8),
       body: SafeArea(child: SingleChildScrollView(
         child: Column(children: [
-          // --- LOGO & PROFILE HEADER ---
           Container(
             width: double.infinity,
             color: Colors.white,
@@ -87,9 +85,8 @@ class _HomePageState extends State<HomePage> {
                   Text('SAIKRUPA CLASSES', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   Text('Karad - Vidya Vinayen Shobhate', style: TextStyle(fontSize: 12, color: Colors.grey)),
                   SizedBox(height: 2),
-                  Text('📍 Malakapur, Karad | 📞 90220022XX', style: TextStyle(fontSize: 11, color: Colors.black87)),
+                  Text('Malakapur, Karad | 90220022XX', style: TextStyle(fontSize: 11, color: Colors.black87)),
                 ])),
-                IconButton(onPressed: (){}, icon: Icon(Icons.edit, size: 18))
               ]),
               SizedBox(height: 14),
               Text('SAIKRUPA CLASSES', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1)),
@@ -101,14 +98,14 @@ class _HomePageState extends State<HomePage> {
               ]),
               SizedBox(height: 8),
               Row(children: [
-                Expanded(child: _topCard("₹$totalBalance", "एकूण बाकी (BALANCE)", Color(0xFFFFCDD2))),
+                Expanded(child: _topCard("₹$totalBalance", "एकूण बाकी", Color(0xFFFFCDD2))),
                 SizedBox(width: 8),
                 Expanded(child: _topCard("$unpaidStudents विद्यार्थी", "फी बाकी असलेले", Color(0xFFFFF9C4))),
               ]),
               SizedBox(height: 12),
               SizedBox(width: double.infinity, child: ElevatedButton.icon(onPressed: () async {
                 var pending = students.where((s)=> s.balance > 0).toList();
-                String msg = "📚 *SAIKRUPA CLASSES - Fee Report* 📚\n\n";
+                String msg = "SAIKRUPA CLASSES - Fee Report\n\n";
                 for(var s in pending){ msg += "${s.name} - Baki: ₹${s.balance}\n"; }
                 final url = Uri.parse("https://wa.me/?text=${Uri.encodeComponent(msg)}");
                 if(await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -117,12 +114,9 @@ class _HomePageState extends State<HomePage> {
           ),
           SizedBox(height: 8),
           Container(color: Colors.white, padding: EdgeInsets.all(10), child: TextField(decoration: InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'नाव किंवा फोन नंबर ने शोधा...', contentPadding: EdgeInsets.symmetric(vertical: 10), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))), onChanged: (v)=>setState(()=> search=v))),
-          
-          // --- MONTH TABLE WITH MORE GAP ---
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Column(children: [
-              // Header
               Container(color: Color(0xFF1E1E2F), width: 700, padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8), child: Row(children: [
                 SizedBox(width: 140, child: Text('नाव', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
                 ...monthNames.map((m)=> Container(width: 32, margin: EdgeInsets.symmetric(horizontal: 2), child: Center(child: Text(m, style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold))))),
@@ -130,7 +124,6 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(width: 70, child: Text('BALANCE', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
                 SizedBox(width: 60, child: Text('ACTION', style: TextStyle(color: Colors.white, fontSize: 12))),
               ])),
-              // Rows
               ...filtered.map((s){
                 int idx = students.indexOf(s);
                 return Container(color: Colors.white, width: 700, margin: EdgeInsets.only(bottom: 1), padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8), child: Row(children: [
@@ -141,7 +134,7 @@ class _HomePageState extends State<HomePage> {
                   ...List.generate(12, (mi){
                     bool isPaid = s.months[mi];
                     return GestureDetector(onTap: (){ setState(()=> students[idx].months[mi] = !students[idx].months[mi]); saveData(); }, 
-                    child: Container(width: 32, height: 28, margin: EdgeInsets.symmetric(horizontal: 2), decoration: BoxDecoration(color: isPaid? Colors.green : Color(0xFFE57373), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.white)), child: Center(child: Icon(isPaid? Icons.check : Icons.close, size: 16, color: Colors.white))));
+                    child: Container(width: 32, height: 28, margin: EdgeInsets.symmetric(horizontal: 2), decoration: BoxDecoration(color: isPaid? Colors.green : Color(0xFFE57373), borderRadius: BorderRadius.circular(6)), child: Center(child: Icon(isPaid? Icons.check : Icons.close, size: 16, color: Colors.white))));
                   }),
                   SizedBox(width: 60, child: Text('₹${s.paidAmount}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green))),
                   SizedBox(width: 70, child: Text('₹${s.balance}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.red))),
@@ -149,7 +142,7 @@ class _HomePageState extends State<HomePage> {
                     InkWell(onTap: (){ setState(()=> students.removeAt(idx)); saveData(); }, child: Icon(Icons.delete, size: 20, color: Colors.grey)),
                     SizedBox(width: 8),
                     InkWell(onTap: () async {
-                      String msg = "Namaskar 🙏 ${s.name}\nPaid: ₹${s.paidAmount}\nBaki: ₹${s.balance}";
+                      String msg = "Namaskar ${s.name}\nPaid: ₹${s.paidAmount}\nBaki: ₹${s.balance}";
                       final url = Uri.parse("https://wa.me/91${s.phone}?text=${Uri.encodeComponent(msg)}");
                       if(await canLaunchUrl(url)) await launchUrl(url, mode: LaunchMode.externalApplication);
                     }, child: Icon(Icons.message, size: 20, color: Colors.green)),
@@ -166,6 +159,4 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _topCard(String val, String title, Color col){
-    return Container(padding: EdgeInsets.symmetric(vertical: 14, horizontal: 8), decoration: BoxDecoration(color: col, borderRadius: BorderRadius.circular(12)), child: Column(children: [Text(val, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)), SizedBox(height: 4), Text(title, style: TextStyle(fontSize: 11), textAlign: TextAlign.center)]));
-  }
-}2
+    return Container(padding: EdgeInsets.symmetric(vertical: 14, horizontal: 8), decoration: BoxDecoration(color: col, borderRadius: BorderRadius.circular(12)), child: Column1
