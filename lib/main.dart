@@ -1,36 +1,234 @@
-import 'dart:convert';import 'package:flutter/material.dart';import 'package:shared_preferences/shared_preferences.dart';import 'package:url_launcher/url_launcher.dart';import 'package:image_picker/image_picker.dart';import 'package:intl/intl.dart';
-void main()=>runApp(const MyApp());
-class MyApp extends StatelessWidget{const MyApp({super.key});@override Widget build(BuildContext c)=>const MaterialApp(debugShowCheckedModeBanner:false,home:HomePage());}
-class Student{String name,phone;int fee;DateTime joinDate;List<bool> months;Student({required this.name,required this.phone,required this.fee,required this.joinDate,required this.months});int get paid=>months.where((e)=>e).length*fee;int get bal=>(12*fee)-paid;Map<String,dynamic> toJson()=>{'name':name,'phone':phone,'fee':fee,'joinDate':joinDate.toIso8601String(),'months':months};factory Student.fromJson(Map<String,dynamic> j)=>Student(name:j['name'],phone:j['phone'],fee:j['fee'],joinDate:DateTime.parse(j['joinDate']),months:List<bool>.from(j['months']));}
-class HomePage extends StatefulWidget{const HomePage({super.key});@override State<HomePage> createState()=>_HomePageState();}
-class _HomePageState extends State<HomePage>{
-List<Student> students=[];String search="";String cName="SAIKRUPA CLASSES";String cAddr="Malakapur, Karad";String cPhone="90220022XX";String? cImg;
-List<String> mS=["J","F","M","A","M","J","J","A","S","O","N","D"];List<String> mF=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-@override void initState(){super.initState();loadData();}
-Future<void> loadData()async{final p=await SharedPreferences.getInstance();setState((){cName=p.getString('cName')??cName;cAddr=p.getString('cAddr')??cAddr;cPhone=p.getString('cPhone')??cPhone;cImg=p.getString('cImg');});String? d=p.getString('allS');if(d!=null){List l=jsonDecode(d);setState(()=>students=l.map((e)=>Student.fromJson(e)).toList());}}
-Future<void> save()async{final p=await SharedPreferences.getInstance();await p.setString('cName',cName);await p.setString('cAddr',cAddr);await p.setString('cPhone',cPhone);if(cImg!=null)await p.setString('cImg',cImg!);await p.setString('allS',jsonEncode(students.map((e)=>e.toJson()).toList()));}
-Future<void> pickImg()async{final picker=ImagePicker();final XFile? x=await picker.pickImage(source:ImageSource.gallery,imageQuality:60);if(x!=null){final b=await x.readAsBytes();setState(()=>cImg=base64Encode(b));save();}}
-void editPro(){TextEditingController n=TextEditingController(text:cName),a=TextEditingController(text:cAddr),ph=TextEditingController(text:cPhone);showDialog(context:context,builder:(ctx)=>AlertDialog(title:const Text('Karad Address Edit'),content:Column(mainAxisSize:MainAxisSize.min,children:[InkWell(onTap:pickImg,child:CircleAvatar(radius:30,backgroundImage:cImg!=null?MemoryImage(base64Decode(cImg!)):null,child:cImg==null?const Icon(Icons.camera_alt):null)),TextField(controller:n,decoration:const InputDecoration(labelText:'Classes Name')),TextField(controller:a,decoration:const InputDecoration(labelText:'Karad Address')),TextField(controller:ph,decoration:const InputDecoration(labelText:'Mobile'))]),actions:[TextButton(onPressed:()=>Navigator.pop(ctx),child:const Text('Cancel')),ElevatedButton(onPressed:(){setState(()=>{cName=n.text,cAddr=a.text,cPhone=ph.text});save();Navigator.pop(ctx);},child:const Text('Save'))]));}void addStu(){TextEditingController nameC=TextEditingController(),phoneC=TextEditingController(),feeC=TextEditingController(text:'500');DateTime sel=DateTime.now();showDialog(context:context,builder:(ctx)=>StatefulBuilder(builder:(ctx2,setSt)=>AlertDialog(title:const Text('Navin Vidyarthi - Amount + Date'),content:Column(mainAxisSize:MainAxisSize.min,children:[TextField(controller:nameC,decoration:const InputDecoration(labelText:'Nav *',border:OutlineInputBorder())),const SizedBox(height:8),TextField(controller:phoneC,decoration:const InputDecoration(labelText:'Contact 10 digit *',border:OutlineInputBorder()),keyboardType:TextInputType.phone),const SizedBox(height:8),TextField(controller:feeC,decoration:const InputDecoration(labelText:'Amount Rs *',border:OutlineInputBorder()),keyboardType:TextInputType.number),const SizedBox(height:10),InkWell(onTap:()async{DateTime? d=await showDatePicker(context:context,initialDate:sel,firstDate:DateTime(2020),lastDate:DateTime(2030));if(d!=null)setSt(()=>sel=d);},child:Container(padding:const EdgeInsets.all(12),decoration:BoxDecoration(border:Border.all(color:Colors.orange),borderRadius:BorderRadius.circular(6),color:Colors.orange.shade50),child:Row(children:[const Icon(Icons.calendar_today,color:Colors.orange),const SizedBox(width:8),Text("Joining: ${DateFormat('dd-MM-yyyy').format(sel)}",style:const TextStyle(fontWeight:FontWeight.bold))])))]),actions:[TextButton(onPressed:()=>Navigator.pop(ctx),child:const Text('Cancel')),ElevatedButton(style:ElevatedButton.styleFrom(backgroundColor:Colors.deepOrange),onPressed:(){if(nameC.text.isNotEmpty){setState(()=>students.add(Student(name:nameC.text,phone:phoneC.text,fee:int.tryParse(feeC.text)??500,joinDate:sel,months:List.filled(12,false))));save();Navigator.pop(ctx);}},child:const Text('Add',style:TextStyle(color:Colors.white)))])));}
-void showRec(Student s,int mi){
-String rno="SKC/2025-26/0${students.indexOf(s)+10}";
-showDialog(context:context,builder:(ctx)=>Dialog(child:Container(padding:const EdgeInsets.all(16),decoration:BoxDecoration(border:Border.all(color:const Color(0xFFC9A86A),width:2),borderRadius:BorderRadius.circular(10),color:Colors.white),child:Column(mainAxisSize:MainAxisSize.min,children:[
-Row(children:[CircleAvatar(backgroundImage:cImg!=null?MemoryImage(base64Decode(cImg!)):null,backgroundColor:Colors.orange.shade100,child:cImg==null?Text(cName[0]):null),const SizedBox(width:8),Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text("FEE RECEIPT",style:TextStyle(fontWeight:FontWeight.bold,color:Color(0xFFB88A2E))),Text(cName,style:const TextStyle(fontSize:10)),Text(cAddr,style:const TextStyle(fontSize:8))])]),
-const Divider(thickness:2),const SizedBox(height:8),
-Row(children:[Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text("Student:",style:TextStyle(fontSize:10,color:Colors.grey)),Text(s.name,style:const TextStyle(fontWeight:FontWeight.bold))])),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text("Amount:",style:TextStyle(fontSize:10,color:Colors.grey)),Text("Rs.${s.fee}",style:const TextStyle(fontWeight:FontWeight.bold))]))]),
-const SizedBox(height:8),
-Row(children:[Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text("Joining Date:",style:TextStyle(fontSize:10,color:Colors.grey)),Text(DateFormat('dd MMM yyyy').format(s.joinDate),style:const TextStyle(fontWeight:FontWeight.bold,fontSize:12))])),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text("Paid Date:",style:TextStyle(fontSize:10,color:Colors.grey)),Text(DateFormat('dd MMM yyyy').format(DateTime.now()),style:const TextStyle(fontWeight:FontWeight.bold,fontSize:12))]))]),
-const SizedBox(height:8),
-Row(children:[Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text("Month Paid:",style:TextStyle(fontSize:10,color:Colors.grey)),Text("${mF[mi]} ${DateTime.now().year}",style:const TextStyle(fontWeight:FontWeight.bold))])),Container(padding:const EdgeInsets.symmetric(horizontal:10,vertical:4),decoration:BoxDecoration(color:Colors.green,borderRadius:BorderRadius.circular(20)),child:const Text("Fee Pochli",style:TextStyle(color:Colors.white,fontSize:11)))]),
-const SizedBox(height:14),Container(padding:const EdgeInsets.all(12),decoration:BoxDecoration(color:const Color(0xFFE8F5E9),borderRadius:BorderRadius.circular(8),border:Border.all(color:Colors.green)),child:Row(mainAxisAlignment:MainAxisAlignment.center,children:[const Icon(Icons.check_circle,color:Colors.green,size:20),const SizedBox(width:8),Text("Paid Amount: Rs.${s.fee}",style:const TextStyle(fontWeight:FontWeight.bold,fontSize:16,color:Colors.green))])),
-const SizedBox(height:10),
-Text("Receipt No: $rno",style:const TextStyle(fontSize:8,color:Colors.grey)),
-const SizedBox(height:12),
-Row(children:[Expanded(child:OutlinedButton(onPressed:()=>Navigator.pop(ctx),child:const Text('Close'))),const SizedBox(width:8),Expanded(child:ElevatedButton(style:ElevatedButton.styleFrom(backgroundColor:Colors.green),onPressed:()async{
-String cleanPhone=s.phone.toString().replaceAll(RegExp(r'[^0-9]'), '');
-if(cleanPhone.length==10) cleanPhone='91'+cleanPhone;
-if(cleanPhone.length<12){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('Number chukicha: ${s.phone}')));return;}
-String msg="*$cName*\n*$cAddr*\n\nFEE RECEIPT\nReceipt: $rno\nStudent: ${s.name}\nJoining: ${DateFormat('dd-MM-yyyy').format(s.joinDate)}\nMonth: ${mF[mi]} ${DateTime.now().year}\nPaid Amount: Rs.${s.fee}\n\nThank You! - $cName";
-final uri=Uri.parse("https://api.whatsapp.com/send?phone=$cleanPhone&text=${Uri.encodeComponent(msg)}");
-await launchUrl(uri,mode:LaunchMode.externalApplication);
-},child:const Text('WhatsApp',style:TextStyle(color:Colors.white))))])]))));}
-@override Widget build(BuildContext c){int tp=students.fold(0,(a,b)=>a+b.paid);int tb=students.fold(0,(a,b)=>a+b.bal);var fil=students.where((e)=>e.name.toLowerCase().contains(search.toLowerCase())).toList();return Scaffold(backgroundColor:const Color(0xFFF5F5F5),appBar:AppBar(title:Text(cName),backgroundColor:Colors.orange,foregroundColor:Colors.white,actions:[IconButton(onPressed:editPro,icon:const Icon(Icons.edit))]),body:Column(children:[Container(color:Colors.white,padding:const EdgeInsets.all(10),child:Column(children:[Row(children:[GestureDetector(onTap:editPro,child:CircleAvatar(radius:24,backgroundImage:cImg!=null?MemoryImage(base64Decode(cImg!)):null,backgroundColor:Colors.orange.shade100,child:cImg==null?Text(cName[0]):null)),const SizedBox(width:10),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(cName,style:const TextStyle(fontWeight:FontWeight.bold)),Text(cAddr,style:const TextStyle(fontSize:11,color:Colors.grey)),Text(cPhone,style:const TextStyle(fontSize:10))]))]),const SizedBox(height:8),Row(children:[Expanded(child:Container(padding:const EdgeInsets.all(8),decoration:BoxDecoration(color:Colors.orange.shade100,borderRadius:BorderRadius.circular(6)),child:Column(children:[Text("${students.length}"),const Text("Students",style:TextStyle(fontSize:9))]))),const SizedBox(width:5),Expanded(child:Container(padding:const EdgeInsets.all(8),decoration:BoxDecoration(color:Colors.green.shade100,borderRadius:BorderRadius.circular(6)),child:Column(children:[Text("Rs.$tp"),const Text("Jama",style:TextStyle(fontSize:9))]))),const SizedBox(width:5),Expanded(child:Container(padding:const EdgeInsets.all(8),decoration:BoxDecoration(color:Colors.red.shade100,borderRadius:BorderRadius.circular(6)),child:Column(children:[Text("Rs.$tb"),const Text("Baki",style:TextStyle(fontSize:9))])))]),])),Padding(padding:const EdgeInsets.all(8),child:TextField(decoration:InputDecoration(prefixIcon:const Icon(Icons.search),hintText:'Search...',border:OutlineInputBorder(borderRadius:BorderRadius.circular(10))),onChanged:(v)=>setState(()=>search=v))),Expanded(child:SingleChildScrollView(scrollDirection:Axis.horizontal,child:SizedBox(width:1100,child:ListView.builder(itemCount:fil.length+1,itemBuilder:(ctx,i){if(i==0) return Container(color:const Color(0xFF1E1E2F),padding:const EdgeInsets.all(10),child:Row(children:[const SizedBox(width:100,child:Text('Nav',style:TextStyle(color:Colors.white,fontWeight:FontWeight.bold,fontSize:12))),const SizedBox(width:85,child:Text('Contact',style:TextStyle(color:Colors.white,fontSize:11))),const SizedBox(width:50,child:Text('Fee',style:TextStyle(color:Colors.white,fontSize:11))),const SizedBox(width:70,child:Text('Join Date',style:TextStyle(color:Colors.white,fontSize:11))),Row(children:mS.map((e)=>Container(width:32,margin:const EdgeInsets.symmetric(horizontal:1),child:Center(child:Text(e,style:const TextStyle(color:Colors.white70,fontSize:11))))).toList()),const SizedBox(width:110,child:Text('Action',style:TextStyle(color:Colors.white,fontSize:11)))]));Student s=fil[i-1];int ri=students.indexOf(s);return Container(color:Colors.white,margin:const EdgeInsets.only(bottom:1),padding:const EdgeInsets.all(7),child:Row(children:[SizedBox(width:100,child:Text(s.name,style:const TextStyle(fontSize:11,fontWeight:FontWeight.bold))),SizedBox(width:85,child:Text(s.phone,style:const TextStyle(fontSize:10))),SizedBox(width:50,child:Text("Rs.${s.fee}",style:const TextStyle(fontSize:10))),SizedBox(width:70,child:Text(DateFormat('dd-MM-yy').format(s.joinDate),style:const TextStyle(fontSize:10))),Row(children:List.generate(12,(mi){bool ok=s.months[mi];return InkWell(onTap:(){setState(()=>students[ri].months[mi]=!students[ri].months[mi]);save();},child:Container(width:32,height:26,margin:const EdgeInsets.symmetric(horizontal:1),decoration:BoxDecoration(color:ok?Colors.green:Colors.red.shade300,borderRadius:BorderRadius.circular(4)),child:Icon(ok?Icons.check:Icons.close,size:13,color:Colors.white)));})),const SizedBox(width:5),InkWell(onTap:(){int last=s.months.lastIndexWhere((e)=>e);showRec(s,last!=-1?last:DateTime.now().month-1);},child:Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:5),decoration:BoxDecoration(color:Colors.blue,borderRadius:BorderRadius.circular(4)),child:const Text('Receipt',style:TextStyle(fontSize:9,color:Colors.white)))),const SizedBox(width:5),InkWell(onTap:()async{String cleanPhone=s.phone.toString().replaceAll(RegExp(r'[^0-9]'), '');if(cleanPhone.length==10) cleanPhone='91'+cleanPhone;String msg="Namaskar ${s.name} Palak, ${DateFormat('MMMM').format(DateTime.now())} fee Rs.${s.fee} - $cName";final uri=Uri.parse("https://api.whatsapp.com/send?phone=$cleanPhone&text=${Uri.encodeComponent(msg)}");await launchUrl(uri,mode:LaunchMode.externalApplication);},child:Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:5),decoration:BoxDecoration(color:Colors.orange,borderRadius:BorderRadius.circular(4)),child:const Text('Remind',style:TextStyle(fontSize:9,color:Colors.white)))),]));}))))]),floatingActionButton:FloatingActionButton.extended(onPressed:addStu,label:const Text('Add Student'),icon:const Icon(Icons.add),backgroundColor:Colors.deepOrange,foregroundColor:Colors.white));}}
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() => runApp(const SaikrupaApp());
+
+class SaikrupaApp extends StatelessWidget {
+  const SaikrupaApp({super.key});
+  @override Widget build(BuildContext context) => const MaterialApp(debugShowCheckedModeBanner: false, home: HomePage());
+}
+
+class StudentFee {
+  String name, amount, joiningDate, monthPaid, mode, receiptNo;
+  StudentFee({required this.name, required this.amount, required this.joiningDate, required this.monthPaid, required this.mode, required this.receiptNo});
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+  @override State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String teacherName = "Sachin Sir";
+  ScreenshotController screenshotController = ScreenshotController();
+  List<StudentFee> students = [];
+
+  @override void initState() { super.initState(); _loadTeacher(); }
+  Future<void> _loadTeacher() async {
+    final p = await SharedPreferences.getInstance();
+    setState(()=> teacherName = p.getString('teacher_name')?? "Sachin Sir");
+  }
+  Future<void> _saveTeacher(String n) async {
+    final p = await SharedPreferences.getInstance();
+    await p.setString('teacher_name', n);
+  }
+
+  // ===== 1. MOTHI PROFILE - FULL SCREEN =====
+  void _openBigProfile(){
+    var ctrl = TextEditingController(text: teacherName);
+    Navigator.push(context, MaterialPageRoute(builder: (_) => Scaffold(
+      appBar: AppBar(title: const Text("Teacher Profile"), backgroundColor: const Color(0xFF0A2342), foregroundColor: Colors.white),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(children: [
+          const SizedBox(height: 20),
+          Center(child: Stack(alignment: Alignment.center, children: [
+            Container(width: 150, height: 150, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFC9A84C), width: 4), image: const DecorationImage(image: AssetImage('assets/logo.png'), fit: BoxFit.cover))),
+            Container(width: 150, height: 150, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFC9A84C), width: 4))),
+          ])),
+          const SizedBox(height: 20),
+          const Text("SAIKRUPA CLASSES", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0A2342))),
+          const Text("Faith • Devotion • Education", style: TextStyle(color: Colors.grey)),
+          const SizedBox(height: 30),
+          TextField(
+            controller: ctrl,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            decoration: InputDecoration(
+              labelText: "Teacher Che Nav",
+              hintText: "Ex: Sachin Sir",
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+              prefixIcon: const Icon(Icons.person, size: 30),
+              suffixIcon: IconButton(icon: const Icon(Icons.clear), onPressed: ()=> ctrl.clear()),
+              contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+            ),
+          ),
+          const SizedBox(height: 30),
+          SizedBox(width: double.infinity, height: 55, child: ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0A2342), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+            onPressed: (){
+              if(ctrl.text.trim().isEmpty) return;
+              setState(()=> teacherName = ctrl.text.trim());
+              _saveTeacher(teacherName);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("✅ Teacher: $teacherName Save Jhala")));
+            },
+            child: const Text("SAVE / UPDATE", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          )),
+        ]),
+      ),
+    )));
+  }
+
+  // ===== 2. STUDENT EDIT / DELETE =====
+  void _editOrDeleteStudent(int index){
+    var s = students[index];
+    var nameCtrl = TextEditingController(text: s.name);
+    var amtCtrl = TextEditingController(text: s.amount);
+    var monthCtrl = TextEditingController(text: s.monthPaid);
+    var joinCtrl = TextEditingController(text: s.joiningDate);
+    String mode = s.mode;
+
+    showDialog(context: context, builder: (_)=> AlertDialog(
+      title: Text("Edit / Delete - ${s.name}"),
+      content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "Student Name", border: OutlineInputBorder())),
+        const SizedBox(height: 10),
+        TextField(controller: amtCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Amount", border: OutlineInputBorder())),
+        const SizedBox(height: 10),
+        TextField(controller: monthCtrl, decoration: const InputDecoration(labelText: "Month Paid", border: OutlineInputBorder())),
+        const SizedBox(height: 10),
+        TextField(controller: joinCtrl, decoration: const InputDecoration(labelText: "Joining Date", border: OutlineInputBorder())),
+        const SizedBox(height: 10),
+        DropdownButtonFormField(value: mode, items: const [DropdownMenuItem(value: "Cash", child: Text("Cash")), DropdownMenuItem(value: "Online", child: Text("Online"))], onChanged: (v)=> mode = v!),
+      ])),
+      actions: [
+        TextButton.icon(icon: const Icon(Icons.delete, color: Colors.red), label: const Text("DELETE", style: TextStyle(color: Colors.red)), onPressed: (){
+          setState(()=> students.removeAt(index));
+          Navigator.pop(context);
+        }),
+        ElevatedButton(onPressed: (){
+          setState((){
+            students[index].name = nameCtrl.text.trim();
+            students[index].amount = amtCtrl.text.trim();
+            students[index].monthPaid = monthCtrl.text.trim();
+            students[index].joiningDate = joinCtrl.text.trim();
+            students[index].mode = mode;
+          });
+          Navigator.pop(context);
+        }, child: const Text("UPDATE")),
+      ],
+    ));
+  }
+
+  void _addFeeDialog(){
+    var nameCtrl = TextEditingController();
+    var amtCtrl = TextEditingController(text: "500");
+    var monthCtrl = TextEditingController(text: DateFormat('MMMM yyyy').format(DateTime.now()));
+    var joinCtrl = TextEditingController(text: "5 Sep 2025");
+    String mode = "Cash";
+    showDialog(context: context, builder: (_)=> StatefulBuilder(builder: (context, setD)=> AlertDialog(
+      title: const Text("Fee Entry"),
+      content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "Student Name *", border: OutlineInputBorder())),
+        const SizedBox(height: 10),
+        TextField(controller: amtCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: "Amount", border: OutlineInputBorder())),
+        const SizedBox(height: 10),
+        TextField(controller: monthCtrl, decoration: const InputDecoration(labelText: "Month", border: OutlineInputBorder())),
+        const SizedBox(height: 10),
+        TextField(controller: joinCtrl, decoration: const InputDecoration(labelText: "Joining Date", border: OutlineInputBorder())),
+        const SizedBox(height: 10),
+        DropdownButtonFormField(value: mode, items: const [DropdownMenuItem(value: "Cash", child: Text("Cash")), DropdownMenuItem(value: "Online", child: Text("Online"))], onChanged: (v)=> setD(()=> mode = v!)),
+      ])),
+      actions: [
+        TextButton(onPressed: ()=> Navigator.pop(context), child: const Text("Cancel")),
+        ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0A2342)), onPressed: (){
+          if(nameCtrl.text.trim().isEmpty) return;
+          final fee = StudentFee(name: nameCtrl.text.trim(), amount: amtCtrl.text.trim(), monthPaid: monthCtrl.text.trim(), joiningDate: joinCtrl.text.trim(), mode: mode, receiptNo: "SKC/${DateTime.now().year}/${DateTime.now().millisecondsSinceEpoch.toString().substring(8,13)}");
+          Navigator.pop(context);
+          _showReceipt(fee, isNew: true);
+        }, child: const Text("Receipt Bana", style: TextStyle(color: Colors.white))),
+      ],
+    )));
+  }
+
+  void _showReceipt(StudentFee s, {bool isNew = false}){
+    String paidDate = DateFormat('d MMM yyyy').format(DateTime.now());
+    String issued = DateFormat('d MMM yyyy • hh:mm a').format(DateTime.now());
+    showDialog(context: context, builder: (_)=> Dialog(insetPadding: const EdgeInsets.all(8), child: SingleChildScrollView(child: Column(children: [
+      Screenshot(
+        controller: screenshotController,
+        child: Container(
+          width: 1080, color: const Color(0xFFFFFBF0), padding: const EdgeInsets.all(12),
+          child: Container(
+            decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC9A84C), width: 2.5)),
+            child: Column(children: [
+              const SizedBox(height: 14),
+              // LOGO - Receipt madhe jaeel
+              Image.asset('assets/logo.png', height: 95, errorBuilder: (_,__,___)=> const Icon(Icons.school, size: 70, color: Color(0xFF8B6A2A))),
+              const SizedBox(height: 6),
+              const Text("SAIKRUPA CLASSES", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0A2342))),
+              const SizedBox(height: 8),
+              const Text("FEE RECEIPT", style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: Color(0xFF8B6A2A))),
+              const SizedBox(height: 10),
+              Container(width: double.infinity, color: const Color(0xFF0A2342), padding: const EdgeInsets.symmetric(vertical: 7), child: Center(child: Text("$teacherName • SAIKRUPA CLASSES • Faith • Devotion • Education", style: const TextStyle(color: Color(0xFFFFD700), fontSize: 11, fontWeight: FontWeight.w600), textAlign: TextAlign.center))),
+              Padding(padding: const EdgeInsets.all(18), child: Column(children: [
+                Row(children: [
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text("👤 Student Name:", style: TextStyle(fontSize: 11, color: Colors.black54)), Text(s.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), const SizedBox(height: 12), Text("💰 Amount: Rs. ${s.amount}"), const SizedBox(height: 12), Text("📅 Joining: ${s.joiningDate}") ])),
+                  const SizedBox(width: 14),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text("📅 Paid Date: $paidDate"), const SizedBox(height: 12), Text("🗓️ Month: ${s.monthPaid}"), const SizedBox(height: 12), Text("💵 Mode: ${s.mode}") ])),
+                ]),
+                const SizedBox(height: 18),
+                Container(width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14), decoration: BoxDecoration(color: const Color(0xFFD9E9FF), borderRadius: BorderRadius.circular(6)), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text("Total Paid: Rs. ${s.amount}", style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0A2342))), const Text("Balance: Rs. 0")])),
+              ])),
+              Container(width: double.infinity, color: const Color(0xFF0A2342), padding: const EdgeInsets.all(7), child: Text("Receipt No: ${s.receiptNo} | Teacher: $teacherName | Issued: $issued", style: const TextStyle(color: Colors.white, fontSize: 8.5), textAlign: TextAlign.center)),
+            ]),
+          ),
+        ),
+      ),
+      const SizedBox(height: 12),
+      Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: SizedBox(width: double.infinity, child: ElevatedButton.icon(icon: const Icon(Icons.share), label: Text("${s.name} la Logo sahit Share"), style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0A2342), padding: const EdgeInsets.symmetric(vertical: 14)), onPressed: () async {
+        final Uint8List? img = await screenshotController.capture();
+        if(img==null) return;
+        final dir = await getTemporaryDirectory();
+        final file = await File('${dir.path}/${s.name}_receipt.png').create();
+        await file.writeAsBytes(img);
+        if(isNew) setState(()=> students.insert(0, s));
+        await Share.shareXFiles([XFile(file.path)], text: "${s.name} - Fee Receipt by $teacherName - Saikrupa Classes");
+      }))),
+      const SizedBox(height: 10),
+    ]))));
+  }
+
+  @override Widget build(BuildContext context){
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Saikrupa Classes", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF0A2342),
+        actions: [
+          IconButton(icon: const Icon(Icons.account_circle, size: 38), onPressed: _openBigProfile, tooltip: "Mothi Profile"),
+        ],
+      ),
+      body: students.isEmpty? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        const Icon(Icons.school, size: 90, color: Color(0xFFC9A84C)),
+        const SizedBox(height: 12),
+        Text("Teacher: $teacherName", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 20),
+        ElevatedButton.icon(onPressed: _openBigProfile, icon: const Icon(Icons.person), label: const Text("MOTHI PROFILE BAGHA / EDIT KARA")),
+      ])) : ListView.builder(itemCount: students.length, itemBuilder: (c,i)=> Card(margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), child: ListTile(
+        onTap: ()=> _showReceipt(students[i]),
+        onLongPress: ()=> _editOrDeleteStudent(i),
+        leading: CircleAvatar(child: Text(students[i].name[0].toUpperCase())),
+        title: Text(students[i].name, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text("Rs.${students[i].amount} | ${students[i].monthPaid} | By $teacherName"),
+        trailing: PopupMenuButton(onSelected: (v){ if(v=='edit') _editOrDeleteStudent(i); else setState(()=> students.removeAt(i)); }, itemBuilder: (_)=> const [PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit), SizedBox(width:8), Text("Edit")])), PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete, color: Colors.red), SizedBox(width:8), Text("Delete", style: TextStyle(color: Colors.red))]))]),
+      ))),
+      floatingActionButton: FloatingActionButton.extended(onPressed: _addFeeDialog, backgroundColor: const Color(0xFF0A2342), foregroundColor: Colors.white, icon: const Icon(Icons.add), label: const Text("Fee Add Kara")),
+    );
+  }
+}
