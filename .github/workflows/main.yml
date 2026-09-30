@@ -13,7 +13,7 @@ jobs:
         with:
           channel: 'stable'
       - name: Create android
-        run: flutter create . --platforms=android
+        run: flutter create. --platforms=android
       - name: Get packages
         run: flutter pub get
       - name: Build APK
