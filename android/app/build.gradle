@@ -11,16 +11,14 @@ if (localPropertiesFile.exists()) {
         localProperties.load(reader)
     }
 }
-
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) { flutterVersionCode = '1' }
-
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) { flutterVersionName = '1.0' }
 
 android {
     namespace = "com.saikrupa.classes"
-    compileSdk = 34
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -34,21 +32,16 @@ android {
     defaultConfig {
         applicationId = "com.saikrupa.classes"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 36
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
+    buildTypes { release { signingConfig = signingConfigs.debug } }
 
-    buildTypes {
-        release { signingConfig = signingConfigs.debug }
-    }
-
-    // APK NAV ITHUN BADLEL - saikrupa-classes.apk
     applicationVariants.all { variant ->
         variant.outputs.all {
             outputFileName = "saikrupa-classes.apk"
         }
     }
 }
-
 flutter { source = "../.." }
