@@ -15,24 +15,28 @@ jobs:
         with:
           flutter-version: '3.22.0'
           channel: 'stable'
+
+      - name: Create Android Project
+        run: |
+          rm -rf android/
+          flutter create . --platforms=android --org com.saikrupa.classes --project-name saikrupa_classes
+
       - run: flutter pub get
+
       - name: Generate App Icon
         run: |
           echo "Generating launcher icons from assets/logo.png"
-          mkdir -p assets
-          # If app_icon.png not exists, copy logo.png as icon
-          if [! -f assets/app_icon.png ]; then cp assets/logo.png assets/app_icon.png; fi
-          # Resize and copy to all mipmap folders
+          # logo.png is icon
+          cp assets/logo.png assets/app_icon.png
           for d in android/app/src/main/res/mipmap-*; do
-            if [ -d "$d" ]; then
-              cp assets/app_icon.png $d/ic_launcher.png
-              cp assets/app_icon.png $d/ic_launcher_round.png
-            fi
+            cp assets/app_icon.png $d/ic_launcher.png
+            cp assets/app_icon.png $d/ic_launcher_round.png
           done
-          # Create android folder fresh if needed and copy
-          flutter create. --platforms=android --org com.saikrupa.classes --project-name saikrupa_classes
-          for d in android/app/src/main/res/mipmap-*; do cp assets/app_icon.png $d/ic_launcher.png; cp assets/app_icon.png $d/ic_launcher_round.png; done
-      - run: flutter build apk --release
+          ls -l android/app/src/main/res/mipmap-hdpi/
+
+      - name: Build APK
+        run: flutter build apk --release
+
       - uses: actions/upload-artifact@v4
         with:
           name: Saikrupa-Classes-APK
