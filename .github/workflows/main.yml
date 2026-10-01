@@ -19,7 +19,7 @@ jobs:
       - name: Generate Icons
         run: dart run flutter_launcher_icons
       - name: Build APK
-        run: flutter build apk --release
+        run:    flutter build apk --release --no-tree-shake-icons 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
