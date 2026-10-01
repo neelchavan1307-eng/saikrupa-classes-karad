@@ -11,11 +11,7 @@ void main() => runApp(const SaikrupaApp());
 class SaikrupaApp extends StatelessWidget {
   const SaikrupaApp({super.key});
   @override Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.orange, useMaterial3: true),
-      home: const HomeScreen(),
-    );
+    return MaterialApp(debugShowCheckedModeBanner: false, theme: ThemeData(primarySwatch: Colors.orange, useMaterial3: true), home: const HomeScreen());
   }
 }
 
@@ -26,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int currentTab = 0;
+  String contactNumber = "तुमचा मोबाईल नंबर इथे टाका";
   List<Map<String, dynamic>> students = [
     {"name": "विहान लुपे", "age": 6, "fee": 360, "batch": "सकाळ", "payments": {}},
     {"name": "क्रिशा किरमे", "age": 10, "fee": 400, "batch": "सकाळ", "payments": {}},
@@ -40,30 +37,40 @@ class _HomeScreenState extends State<HomeScreen> {
     {"name": "संस्कृती", "age": 14, "fee": 500, "batch": "संध्याकाळ", "payments": {}},
     {"name": "स्वरांश", "age": 10, "fee": 400, "batch": "संध्याकाळ", "payments": {}},
   ];
-
   String filterBatch = "सगळे";
   final List<String> months = ["जून","जुलै","ऑगस्ट","सप्टेंबर","ऑक्टोबर","नोव्हेंबर","डिसेंबर","जानेवारी","फेब्रुवारी","मार्च","एप्रिल","मे"];
-
   @override void initState() { super.initState(); loadData(); }
-
   Future<void> loadData() async {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('saikrupa_final_v1');
-    if (data!= null) {
-      setState(() { students = List<Map<String, dynamic>>.from(jsonDecode(data)); });
-    } else { saveData(); }
+    final savedContact = prefs.getString('contact_number');
+    if (data!= null) setState(() { students = List<Map<String, dynamic>>.from(jsonDecode(data)); });
+    if (savedContact!= null) setState(() { contactNumber = savedContact; });
+    else saveData();
   }
   Future<void> saveData() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('saikrupa_final_v1', jsonEncode(students));
   }
-
+  Future<void> saveContact(String num) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('contact_number', num);
+    setState(()=> contactNumber = num);
+  }
+  void editContactDialog() {
+    final ctrl = TextEditingController(text: contactNumber.contains("टाका")? "" : contactNumber);
+    showDialog(context: context, builder: (c)=> AlertDialog(
+      title: Text("मोबाईल नंबर टाका"),
+      content: TextField(controller: ctrl, keyboardType: TextInputType.phone, decoration: InputDecoration(hintText: "उदा. 9876543210")),
+      actions: [TextButton(onPressed: ()=> Navigator.pop(c), child: Text("रद्द")), ElevatedButton(onPressed: (){ saveContact(ctrl.text); Navigator.pop(c); }, child: Text("Save"))],
+    ));
+  }
   void addOrEditStudent({Map<String, dynamic>? existing, int? index}) {
     final nameCtrl = TextEditingController(text: existing?['name']?? '');
     final feeCtrl = TextEditingController(text: existing?['fee']?.toString()?? '500');
     String batch = existing?['batch']?? 'सकाळ';
     showDialog(context: context, builder: (c) => AlertDialog(
-      title: Text(existing == null? "नवीन विद्यार्थी" : "Edit करा - फी बदलता येईल"),
+      title: Text(existing == null? "नवीन विद्यार्थी" : "Edit करा"),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: "नाव")),
         const SizedBox(height: 10),
@@ -82,25 +89,20 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     ));
   }
-
   Widget buildProfile() {
-    return ListView(
-      padding: EdgeInsets.all(20),
-      children: [
-        SizedBox(height: 20),
-        Center(child: Image.asset('assets/logo.png', height: 120, errorBuilder: (c,e,s)=> Icon(Icons.school, size: 100, color: Colors.orange))),
-        SizedBox(height: 15),
-        Center(child: Text('SAIKRUPA CLASSES', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFFFF8C00)))),
-        SizedBox(height: 5),
-        Center(child: Text('Morya Park, Sangurdi Road, Yelwadi', textAlign: TextAlign.center, style: TextStyle(fontSize: 14))),
-        Divider(height: 40),
-        ListTile(leading: Icon(Icons.location_on, color: Colors.orange), title: Text('पत्ता'), subtitle: Text('Morya Park, Sangurdi Road, Yelwadi, Karad')),
-        ListTile(leading: Icon(Icons.phone, color: Colors.orange), title: Text('संपर्क'), subtitle: Text('तुमचा मोबाईल नंबर इथे टाका')),
-        ListTile(leading: Icon(Icons.verified, color: Colors.orange), title: Text('App Version'), subtitle: Text('v2.0 - With Receipt Share')),
-      ],
-    );
+    return ListView(padding: EdgeInsets.all(20), children: [
+      SizedBox(height: 20),
+      Center(child: Image.asset('assets/logo.png', height: 120, errorBuilder: (c,e,s)=> Icon(Icons.school, size: 100, color: Colors.orange))),
+      SizedBox(height: 15),
+      Center(child: Text('SAIKRUPA CLASSES', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFFFF8C00)))),
+      SizedBox(height: 5),
+      Center(child: Text('Morya Park, Sangodi Road, Yelwadi', textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
+      Divider(height: 40),
+      ListTile(leading: Icon(Icons.location_on, color: Colors.orange), title: Text('पत्ता'), subtitle: Text('Morya Park, Sangodi Road, Yelwadi, Pune')),
+      ListTile(leading: Icon(Icons.phone, color: Colors.orange), title: Text('संपर्क - Edit करण्यासाठी टॅप करा'), subtitle: Text(contactNumber), onTap: editContactDialog, trailing: Icon(Icons.edit, color: Colors.orange)),
+      ListTile(leading: Icon(Icons.verified, color: Colors.orange), title: Text('App Version'), subtitle: Text('v2.1 - Pune Address')),
+    ]);
   }
-
   @override Widget build(BuildContext context) {
     List<Map<String, dynamic>> filtered = filterBatch=="सगळे"? students : students.where((s)=>s['batch']==filterBatch).toList();
     return Scaffold(
@@ -137,30 +139,23 @@ class _StudentDetailState extends State<StudentDetail>{
   late Map payments;
   final ScreenshotController screenshotController = ScreenshotController();
   String lastPaidMonth = "";
-
   @override void initState(){ super.initState(); payments = Map.from(widget.student['payments']?? {}); }
-
   Future<void> shareReceipt(String month) async {
     setState(()=> lastPaidMonth = month);
     await Future.delayed(Duration(milliseconds: 300));
     final bytes = await screenshotController.capture();
     if(bytes==null) return;
     final dir = await getTemporaryDirectory();
-    final file = await File('${dir.path}/Saikrupa_Receipt_${widget.student['name']}_$month.png').create();
+    final file = await File('${dir.path}/Saikrupa_${widget.student['name']}_$month.png').create();
     await file.writeAsBytes(bytes);
-    await Share.shareXFiles([XFile(file.path)], text: 'SAIKRUPA CLASSES - ${widget.student['name']} - $month Fee Receipt - Morya Park, Yelwadi');
+    await Share.shareXFiles([XFile(file.path)], text: 'SAIKRUPA CLASSES, Morya Park, Sangodi Road, Yelwadi, Pune - ${widget.student['name']} - $month Fee Receipt');
   }
-
   Widget receiptWidget(String month) {
-    return Container(
-      width: 380,
-      color: Colors.white,
-      padding: EdgeInsets.all(20),
-      child: Column(children: [
+    return Container(width: 380, color: Colors.white, padding: EdgeInsets.all(20), child: Column(children: [
         Image.asset('assets/logo.png', height: 80, errorBuilder: (c,e,s)=> Icon(Icons.school, size: 60, color: Colors.orange)),
         SizedBox(height: 8),
         Text('SAIKRUPA CLASSES', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFFF8C00))),
-        Text('Morya Park, Sangurdi Road, Yelwadi, Karad', style: TextStyle(fontSize: 10), textAlign: TextAlign.center),
+        Text('Morya Park, Sangodi Road, Yelwadi, Pune', style: TextStyle(fontSize: 11), textAlign: TextAlign.center),
         Divider(thickness: 2, color: Colors.orange),
         SizedBox(height: 10),
         Text('FEE RECEIPT', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2)),
@@ -174,13 +169,10 @@ class _StudentDetailState extends State<StudentDetail>{
         Container(width: double.infinity, padding: EdgeInsets.all(10), color: Colors.green.shade50, child: Text('PAID ✓', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 16))),
         SizedBox(height: 20),
         Text('धन्यवाद! 🙏', style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 5),
-        Text('Saikrupa Classes, Yelwadi', style: TextStyle(fontSize: 10, color: Colors.grey)),
       ]),
     );
   }
   Widget _row(String l, String v) => Padding(padding: EdgeInsets.symmetric(vertical: 4), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(l), Text(v, style: TextStyle(fontWeight: FontWeight.bold))]));
-
   @override Widget build(BuildContext context){
     int pendingMonths = 12 - payments.length;
     int pendingAmount = pendingMonths * (widget.student['fee'] as int);
@@ -200,16 +192,11 @@ class _StudentDetailState extends State<StudentDetail>{
               subtitle: Text(isPaid? "Paid on ${payments[m]} | ₹${widget.student['fee']}" : "बाकी आहे"),
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                 if(isPaid) IconButton(icon: Icon(Icons.share, color: Colors.blue), onPressed: ()=> shareReceipt(m)),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: isPaid?Colors.red:Colors.green),
-                  onPressed: (){ setState(()=> isPaid? payments.remove(m) : payments[m] = "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}"); widget.onUpdate(payments); },
-                  child: Text(isPaid?"रद्द":"जमा", style: const TextStyle(color: Colors.white)),
-                ),
+                ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: isPaid?Colors.red:Colors.green), onPressed: (){ setState(()=> isPaid? payments.remove(m) : payments[m] = "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}"); widget.onUpdate(payments); }, child: Text(isPaid?"रद्द":"जमा", style: const TextStyle(color: Colors.white))),
               ]),
             );
           }))
         ]),
-        // Hidden Receipt for Screenshot
         Offstage(child: Screenshot(controller: screenshotController, child: receiptWidget(lastPaidMonth.isEmpty? widget.months[0] : lastPaidMonth)))
       ]),
     );
