@@ -15,7 +15,7 @@ jobs:
       - name: Fix Android v1 embedding
         run: rm -rf android
       - name: Recreate Android folder
-        run: flutter create --platforms=android.
+        run: flutter create --platforms=android .
       - name: Get packages
         run: flutter pub get
       - name: Build APK
