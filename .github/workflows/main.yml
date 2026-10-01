@@ -13,31 +13,21 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.19.6'
           channel: 'stable'
 
-      - name: Create Android Project
+      - name: Build APK
         run: |
           rm -rf android/
           flutter create . --platforms=android --org com.saikrupa.classes --project-name saikrupa_classes
-
-      - run: flutter pub get
-
-      - name: Fix Icon - Convert to Proper PNG
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y imagemagick
-          echo "Converting logo to real PNG icon"
-          # Convert any image (jpg/jpeg) to proper 1024x1024 PNG
-          convert assets/logo.png -resize 1024x1024 -background none -gravity center -extent 1024x1024 PNG32:assets/app_icon.png
+          flutter pub get
+          # Fix icon - copy logo to mipmap
+          cp assets/logo.png assets/app_icon.png
           for d in android/app/src/main/res/mipmap-*; do
-            convert assets/logo.png -resize 192x192 PNG32:$d/ic_launcher.png
-            convert assets/logo.png -resize 192x192 PNG32:$d/ic_launcher_round.png
+            cp assets/logo.png $d/ic_launcher.png
+            cp assets/logo.png $d/ic_launcher_round.png
           done
-          echo "Icons fixed"
-
-      - name: Build APK
-        run: flutter build apk --release
+          flutter build apk --release
 
       - uses: actions/upload-artifact@v4
         with:
