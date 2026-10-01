@@ -5,9 +5,10 @@ workflows:
     instance_type: mac_mini_m1
     environment:
       flutter: stable
-      groups:
-        - codemagic
     scripts:
+      - name: Create Android folder
+        script: |
+          flutter create . --platforms=android --org com.saikrupa --project-name saikrupa_classes
       - name: Get packages
         script: |
           flutter pub get
