@@ -23,16 +23,18 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Generate App Icon
+      - name: Fix Icon - Convert to Proper PNG
         run: |
-          echo "Generating launcher icons from assets/logo.png"
-          # logo.png is icon
-          cp assets/logo.png assets/app_icon.png
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+          echo "Converting logo to real PNG icon"
+          # Convert any image (jpg/jpeg) to proper 1024x1024 PNG
+          convert assets/logo.png -resize 1024x1024 -background none -gravity center -extent 1024x1024 PNG32:assets/app_icon.png
           for d in android/app/src/main/res/mipmap-*; do
-            cp assets/app_icon.png $d/ic_launcher.png
-            cp assets/app_icon.png $d/ic_launcher_round.png
+            convert assets/logo.png -resize 192x192 PNG32:$d/ic_launcher.png
+            convert assets/logo.png -resize 192x192 PNG32:$d/ic_launcher_round.png
           done
-          ls -l android/app/src/main/res/mipmap-hdpi/
+          echo "Icons fixed"
 
       - name: Build APK
         run: flutter build apk --release
