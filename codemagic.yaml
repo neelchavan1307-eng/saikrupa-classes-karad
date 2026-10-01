@@ -1,19 +1,21 @@
 workflows:
   android-workflow:
-    name: Android Build
-    instance_type: mac_mini_m2
+    name: Android Workflow
     max_build_duration: 20
+    instance_type: mac_mini_m1
     environment:
       flutter: stable
+      groups:
+        - codemagic
     scripts:
-      - name: Create Android folder
-        script: |
-          flutter create . --platforms=android
       - name: Get packages
         script: |
           flutter pub get
+      - name: Generate Icon
+        script: |
+          flutter pub run flutter_launcher_icons
       - name: Build APK
         script: |
           flutter build apk --release
     artifacts:
-      - build/app/outputs/flutter-apk/app-release.apk
+      - build/**/outputs/**/*.apk
