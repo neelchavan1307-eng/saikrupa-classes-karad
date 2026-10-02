@@ -6,7 +6,12 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
-void main() => runApp(const SaikrupaApp());
+// --- FIX: Ha main async kela ---
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SharedPreferences.getInstance();
+  runApp(const SaikrupaApp());
+}
 
 class SaikrupaApp extends StatelessWidget {
   const SaikrupaApp({super.key});
@@ -175,77 +180,3 @@ class _StudentDetailState extends State<StudentDetail>{
           Text('Faith • Devotion • Education', style: TextStyle(fontSize: 11, color: Color(0xFF8B5E3C), letterSpacing: 1)),
           SizedBox(height: 12),
           Container(width: double.infinity, padding: EdgeInsets.symmetric(vertical: 8), color: Color(0xFF0A2351), child: Text('FEE RECEIPT', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 16))),
-          SizedBox(height: 12),
-          Align(alignment: Alignment.centerLeft, child: Text('RECEIPT DETAILS', style: TextStyle(color: Color(0xFF8B5E3C), fontWeight: FontWeight.bold, fontSize: 13))),
-          Divider(color: Color(0xFFD4AF37)),
-          SizedBox(height: 8),
-          Row(children: [
-            Expanded(child: _detailItem('👤 Student Name:', widget.student['name'])),
-            Expanded(child: _detailItem('📅 Paid Date:', paidDate)),
-          ]),
-          SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: _detailItem('💵 Amount Paid:', 'Rs. ${widget.student['fee']}')),
-            Expanded(child: _detailItem('📆 Month Paid:', month)),
-          ]),
-          SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: _detailItem('📅 Joining Date:', joiningDate)),
-            Expanded(child: _detailItem('💸 Payment Mode:', 'Cash')),
-          ]),
-          SizedBox(height: 30),
-          Stack(clipBehavior: Clip.none, children: [
-            Container(width: double.infinity, padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14), decoration: BoxDecoration(color: Color(0xFFEAF2FF), borderRadius: BorderRadius.circular(8), border: Border.all(color: Color(0xFFBFD0F0))), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('Total Paid: Rs. ${widget.student['fee']}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF0A2351))),
-              Text('Balance: Rs. 0 • Paid in Full', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Color(0xFF0A2351))),
-            ])),
-            Positioned(top: -14, left: 0, right: 0, child: Center(child: Container(padding: EdgeInsets.symmetric(horizontal: 14, vertical: 4), decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(20)), child: Text('✓ Fee Paid', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11))))),
-          ]),
-          SizedBox(height: 16),
-          Text('Thank You for your payment!', style: TextStyle(color: Color(0xFF8B5E3C), fontStyle: FontStyle.italic, fontSize: 12, fontWeight: FontWeight.w600)),
-          SizedBox(height: 12),
-          Container(width: double.infinity, color: Color(0xFF0A2351), padding: EdgeInsets.symmetric(vertical: 6, horizontal: 4), child: Text('Receipt No: $receiptNo • Issued: $paidDate • Computer generated - No signature required', textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 7))),
-        ]),
-      ),
-    );
-  }
-
-  Widget _detailItem(String label, String value) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label, style: TextStyle(fontSize: 10, color: Colors.grey.shade600, fontWeight: FontWeight.w600)),
-      SizedBox(height: 2),
-      Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0A2351))),
-    ]);
-  }
-
-  Widget _row(String l, String v) => Padding(padding: EdgeInsets.symmetric(vertical: 4), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(l), Text(v, style: TextStyle(fontWeight: FontWeight.bold))]));
-
-  @override Widget build(BuildContext context){
-    int pendingMonths = 12 - payments.length;
-    int pendingAmount = pendingMonths * (widget.student['fee'] as int);
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.student['name']), backgroundColor: const Color(0xFFFF8C00)),
-      body: Stack(children: [
-        Column(children: [
-          Container(width: double.infinity, color: pendingAmount==0?Colors.green.shade100:Colors.red.shade100, padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text("${widget.student['name']} | फी: ₹${widget.student['fee']}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(pendingAmount==0? "सगळी फी भरली! ✅" : "बाकी: $pendingMonths महिने = ₹$pendingAmount", style: TextStyle(color: pendingAmount==0?Colors.green:Colors.red, fontWeight: FontWeight.bold)),
-          ])),
-          Expanded(child: ListView.builder(itemCount: widget.months.length, itemBuilder: (c,i){
-            String m = widget.months[i]; bool isPaid = payments.containsKey(m);
-            return ListTile(
-              leading: Icon(isPaid?Icons.check_box:Icons.check_box_outline_blank, color: isPaid?Colors.green:Colors.grey),
-              title: Text(m, style: TextStyle(fontWeight: isPaid?FontWeight.bold:FontWeight.normal)),
-              subtitle: Text(isPaid? "Paid on ${payments[m]} | ₹${widget.student['fee']}" : "बाकी आहे"),
-              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                if(isPaid) IconButton(icon: Icon(Icons.share, color: Colors.blue), onPressed: ()=> shareReceipt(m)),
-                ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: isPaid?Colors.red:Colors.green), onPressed: (){ setState(()=> isPaid? payments.remove(m) : payments[m] = "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}"); widget.onUpdate(payments); }, child: Text(isPaid?"रद्द":"जमा", style: const TextStyle(color: Colors.white))),
-              ]),
-            );
-          }))
-        ]),
-        Offstage(child: Screenshot(controller: screenshotController, child: receiptWidget(lastPaidMonth.isEmpty? widget.months[0] : lastPaidMonth)))
-      ]),
-    );
-  }
-}
