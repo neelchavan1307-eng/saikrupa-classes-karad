@@ -9,8 +9,11 @@ jobs:
         with:
           flutter-version: '3.22.3'
           channel: 'stable'
-      - name: Fix Pubspec
-        run: flutter pub get
+      - name: Recreate Android Folder (V1 Fix)
+        run: |
+          rm -rf android
+          flutter create . --platforms=android --project-name saikrupa_classes_karad --org com.saikrupa
+          flutter pub get
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
       - name: Upload APK
