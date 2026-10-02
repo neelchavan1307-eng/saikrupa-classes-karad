@@ -1,25 +1,21 @@
 name: Build APK
-on:
-  workflow_dispatch:
-
+on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
+          flutter-version: '3.22.3'
           channel: 'stable'
-          cache: true
-
-      - name: Get dependencies
-        run: flutter pub get
-
+      - name: Fix Android Folder
+        run: |
+          rm -rf android
+          flutter create . --platforms=android --project-name saikrupa_classes_karad --org com.saikrupa
+          flutter pub get
       - name: Build APK
         run: flutter build apk --release
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
