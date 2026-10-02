@@ -9,10 +9,47 @@ jobs:
         with:
           flutter-version: '3.22.3'
           channel: 'stable'
-      - name: Recreate Android Folder (V1 Fix)
+      - name: Recreate and Fix Kotlin
         run: |
           rm -rf android
           flutter create . --platforms=android --project-name saikrupa_classes_karad --org com.saikrupa
+          cat > android/app/build.gradle << 'EOF'
+          plugins {
+              id "com.android.application"
+              id "kotlin-android"
+              id "dev.flutter.flutter-gradle-plugin"
+          }
+          android {
+              namespace "com.saikrupa.saikrupa_classes_karad"
+              compileSdk 34
+              ndkVersion flutter.ndkVersion
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_1_8
+                  targetCompatibility JavaVersion.VERSION_1_8
+              }
+              kotlinOptions { jvmTarget = '1.8' }
+              sourceSets { main.java.srcDirs += 'src/main/kotlin' }
+              defaultConfig {
+                  applicationId "com.saikrupa.saikrupa_classes_karad"
+                  minSdk 23
+                  targetSdk 34
+                  versionCode flutter.versionCode
+                  versionName flutter.versionName
+              }
+              buildTypes { release { signingConfig signingConfigs.debug } }
+          }
+          flutter { source '../..' }
+          dependencies {
+              implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+          }
+          configurations.all {
+              resolutionStrategy {
+                  force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+                  force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"
+                  force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
+              }
+          }
+          EOF
           flutter pub get
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
