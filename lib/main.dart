@@ -6,7 +6,6 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
-// --- FIX: Ha main async kela ---
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SharedPreferences.getInstance();
@@ -126,57 +125,4 @@ class _HomeScreenState extends State<HomeScreen> {
           return Card(margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), child: ListTile(
             onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (_)=> StudentDetail(student: s, months: months, onUpdate: (newPay){ setState(()=>students[realIndex]['payments']=newPay); saveData(); }))),
             onLongPress: ()=>addOrEditStudent(existing: s, index: realIndex),
-            leading: CircleAvatar(backgroundColor: paid==12?Colors.green:Colors.orange, child: Text(s['name'][0].toUpperCase(), style: const TextStyle(color: Colors.white))),
-            title: Text("${s['name']}", style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text("${s['batch']} | ₹${s['fee']}/महिना | $paid/12 Paid"),
-            trailing: Icon(paid==12? Icons.verified : Icons.pending, color: paid==12?Colors.green:Colors.red),
-          ));
-        }))
-      ]),
-      floatingActionButton: currentTab==0? FloatingActionButton(onPressed: ()=>addOrEditStudent(), backgroundColor: const Color(0xFFFF8C00), child: const Icon(Icons.add, color: Colors.white)) : null,
-    );
-  }
-}
-
-class StudentDetail extends StatefulWidget {
-  final Map<String, dynamic> student; final List<String> months; final Function(Map) onUpdate;
-  const StudentDetail({super.key, required this.student, required this.months, required this.onUpdate});
-  @override State<StudentDetail> createState()=> _StudentDetailState();
-}
-class _StudentDetailState extends State<StudentDetail>{
-  late Map payments;
-  final ScreenshotController screenshotController = ScreenshotController();
-  String lastPaidMonth = "";
-  @override void initState(){ super.initState(); payments = Map.from(widget.student['payments']?? {}); }
-
-  Future<void> shareReceipt(String month) async {
-    setState(()=> lastPaidMonth = month);
-    await Future.delayed(Duration(milliseconds: 400));
-    final bytes = await screenshotController.capture();
-    if(bytes==null) return;
-    final dir = await getTemporaryDirectory();
-    final file = await File('${dir.path}/Saikrupa_${widget.student['name']}_$month.png').create();
-    await file.writeAsBytes(bytes);
-    await Share.shareXFiles([XFile(file.path)], text: 'SAIKRUPA CLASSES, Morya Park, Sangodi Road, Yelwadi - ${widget.student['name']} - $month Fee Receipt ✅\n\nFaith • Devotion • Education');
-  }
-
-  Widget receiptWidget(String month) {
-    String paidDate = payments[month]?? "${DateTime.now().day} ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][DateTime.now().month-1]} ${DateTime.now().year}";
-    String receiptNo = "SKC/${DateTime.now().year}/${(widget.student['name'].hashCode.abs() % 9000) + 1000}";
-    String joiningDate = widget.student['joining']?? "5 Sep 2025";
-    return Container(
-      width: 400,
-      decoration: BoxDecoration(color: Color(0xFFFFFEF5), border: Border.all(color: Color(0xFFD4AF37), width: 4), borderRadius: BorderRadius.circular(4)),
-      child: Container(
-        margin: EdgeInsets.all(4),
-        decoration: BoxDecoration(border: Border.all(color: Color(0xFFD4AF37), width: 1.5, style: BorderStyle.solid)),
-        padding: EdgeInsets.all(16),
-        child: Column(children: [
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Image.asset('assets/logo.png', height: 70, errorBuilder: (c,e,s)=> Icon(Icons.school, size: 50, color: Colors.orange)),
-          ]),
-          SizedBox(height: 6),
-          Text('SAIKRUPA CLASSES', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0A2351), letterSpacing: 1.5)),
-          Text('Faith • Devotion • Education', style: TextStyle(fontSize: 11, color: Color(0xFF8B5E3C), letterSpacing: 1)),
-          SizedBox(height: 12),
-          Container(width: double.infinity, padding: EdgeInsets.symmetric(vertical: 8), color: Color(0xFF0A2351), child: Text('FEE RECEIPT', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 16))),
+            leading: CircleAvatar(backgroundColor: paid==12?Colors.green:Colors.orange, child: Text(s['name'][0].toUpperCase(), style: const TextStyle
