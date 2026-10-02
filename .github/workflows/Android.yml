@@ -8,12 +8,14 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.3'
-      - run: |
+      - name: Fix Android
+        run: |
           rm -rf android
           flutter create . --platforms=android --org com.saikrupa --project-name saikrupa_classes_karad
-          flutter pub get
+          sed -i "s/ext.kotlin_version.*/ext.kotlin_version = '1.9.22'/" android/build.gradle
+      - run: flutter pub get
       - run: flutter build apk --release --no-tree-shake-icons
       - uses: actions/upload-artifact@v4
         with:
-          name: Saikrupa-APK-Download
+          name: Saikrupa-APK
           path: build/app/outputs/flutter-apk/app-release.apk
