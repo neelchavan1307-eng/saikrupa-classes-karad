@@ -11,52 +11,30 @@ if (localPropertiesFile.exists()) {
         localProperties.load(reader)
     }
 }
-
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '2'
-}
-
+if (flutterVersionCode == null) { flutterVersionCode = '2' }
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '2.0'
-}
+if (flutterVersionName == null) { flutterVersionName = '2.0' }
 
 android {
-    namespace "com.example.saikrupa_classes"
-    compileSdk 34
+    namespace = "com.saikrupa.classes"
+    compileSdk 36
     ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-    }
+    kotlinOptions { jvmTarget = '1.8' }
+    sourceSets { main.java.srcDirs += 'src/main/kotlin' }
 
     defaultConfig {
-        applicationId "com.example.saikrupa_classes"
+        applicationId = "com.saikrupa.classes"
         minSdk 21
-        targetSdk 34
+        targetSdk 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
-
-    buildTypes {
-        release {
-            signingConfig signingConfigs.debug
-        }
-    }
+    buildTypes { release { signingConfig signingConfigs.debug } }
 }
-
-flutter {
-    source '../..'
-}
-
-dependencies {}
+flutter { source '../..' }
