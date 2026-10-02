@@ -1,35 +1,27 @@
-name: Build Saikrupa APK
+name: Build APK
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+      
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.24.5'
           channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
 
       - name: Build APK
-        run: |
-          rm -rf android/
-          flutter create . --platforms=android --org com.saikrupa.classes --project-name saikrupa_classes
-          flutter pub get
-          # Fix icon - copy logo to mipmap
-          cp assets/logo.png assets/app_icon.png
-          for d in android/app/src/main/res/mipmap-*; do
-            cp assets/logo.png $d/ic_launcher.png
-            cp assets/logo.png $d/ic_launcher_round.png
-          done
-          flutter build apk --release
+        run: flutter build apk --release
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          name: Saikrupa-Classes-APK
+          name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
