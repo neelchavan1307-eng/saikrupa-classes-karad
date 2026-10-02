@@ -1,245 +1,27 @@
-import 'dart:io';
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await SharedPreferences.getInstance();
-  runApp(const SaikrupaApp());
-}
-
-class SaikrupaApp extends StatelessWidget {
-  const SaikrupaApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
+// main.dart - FINAL with Sai Logo - Saikrupa Classes Karad
+import 'dart:io'; import 'dart:convert'; import 'package:flutter/material.dart'; import 'package:shared_preferences/shared_preferences.dart'; import 'package:screenshot/screenshot.dart'; import 'package:share_plus/share_plus.dart'; import 'package:path_provider/path_provider.dart';
+void main() async { WidgetsFlutterBinding.ensureInitialized(); runApp(const SaikrupaApp()); }
+class SaikrupaApp extends StatelessWidget { const SaikrupaApp({super.key}); @override Widget build(BuildContext context) { return MaterialApp(debugShowCheckedModeBanner: false, home: const HomeScreen()); } }
+class HomeScreen extends StatefulWidget { const HomeScreen({super.key}); @override State<HomeScreen> createState() => _HomeScreenState(); }
 class _HomeScreenState extends State<HomeScreen> {
-  int currentTab = 0;
-  String contactNumber = "9876543210";
-  List<Map<String, dynamic>> students = [
-    {"name": "विहान लुपे", "fee": 360, "batch": "सकाळ", "payments": {}},
-    {"name": "क्रिशा किरमे", "fee": 400, "batch": "सकाळ", "payments": {}},
-    {"name": "अंबरशुमन इतापे", "fee": 500, "batch": "सकाळ", "payments": {}},
-    {"name": "आराध्या यादव", "fee": 360, "batch": "सकाळ", "payments": {}},
-    {"name": "सम्यक भिर्के", "fee": 360, "batch": "सकाळ", "payments": {}},
-    {"name": "श्रेया गादेकर", "fee": 500, "batch": "सकाळ", "payments": {}},
-    {"name": "स्वरा पाटील", "fee": 360, "batch": "सकाळ", "payments": {}},
-    {"name": "स्वरूप पाटील", "fee": 360, "batch": "सकाळ", "payments": {}},
-    {"name": "तेजल पाटील", "fee": 550, "batch": "संध्याकाळ", "payments": {}},
-    {"name": "पूर्वा पाटील", "fee": 550, "batch": "संध्याकाळ", "payments": {}},
-    {"name": "संस्कृती", "fee": 500, "batch": "संध्याकाळ", "payments": {}},
-    {"name": "स्वरांश", "fee": 400, "batch": "संध्याकाळ", "payments": {}},
-  ];
-
-  String filterBatch = "सगळे";
-  final List<String> months = ["जून","जुलै","ऑगस्ट","सप्टेंबर","ऑक्टोबर","नोव्हेंबर","डिसेंबर","जानेवारी","फेब्रुवारी","मार्च","एप्रिल","मे"];
-
-  @override
-  void initState() { super.initState(); loadData(); }
-
-  Future<void> loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString('saikrupa_final_v1');
-    if (data!= null) {
-      setState(() {
-        students = List<Map<String, dynamic>>.from(jsonDecode(data));
-      });
-    }
-  }
-
-  Future<void> saveData() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('saikrupa_final_v1', jsonEncode(students));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    List<Map<String, dynamic>> filtered = filterBatch == "सगळे"? students : students.where((s) => s['batch'] == filterBatch).toList();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(currentTab == 0? "SAIKRUPA CLASSES" : "Profile"),
-        backgroundColor: Colors.orange,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentTab,
-        onTap: (i) => setState(() => currentTab = i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: "विद्यार्थी"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "प्रोफाइल"),
-        ],
-      ),
-      body: currentTab == 1
-         ? Center(child: Text('SAIKRUPA CLASSES\nMorya Park, Sangodi Road', textAlign: TextAlign.center))
-          : Column(
-              children: [
-                Container(
-                  color: Colors.orange.shade50,
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("एकूण: ${filtered.length} मुले", style: const TextStyle(fontWeight: FontWeight.bold)),
-                      ToggleButtons(
-                        isSelected: [filterBatch == "सगळे", filterBatch == "सकाळ", filterBatch == "संध्याकाळ"],
-                        onPressed: (i) => setState(() => filterBatch = ["सगळे", "सकाळ", "संध्याकाळ"][i]),
-                        children: const [
-                          Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text("सगळे")),
-                          Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text("सकाळ")),
-                          Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Text("संध्या")),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: filtered.length,
-                    itemBuilder: (c, i) {
-                      final s = filtered[i];
-                      int realIndex = students.indexOf(s);
-                      int paid = (s['payments'] as Map).length;
-                      return Card(
-                        child: ListTile(
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => StudentDetail(student: s, months: months, onUpdate: (newPay) { setState(() => students[realIndex]['payments'] = newPay); saveData(); }))),
-                          leading: CircleAvatar(child: Text(s['name'][0])),
-                          title: Text(s['name']),
-                          subtitle: Text("${s['batch']} | ₹${s['fee']} | $paid/12 Paid"),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-    );
+  int tab=0; String filter="सगळे";
+  List<Map<String,dynamic>> students=[{"name":"विहान तुपे","fee":360,"batch":"सकाळ","payments":{}},{"name":"क्रिशा किरमे","fee":400,"batch":"सकाळ","payments":{}},{"name":"अनशुमन इतापे","fee":500,"batch":"सकाळ","payments":{}},{"name":"आराध्या यादव","fee":360,"batch":"सकाळ","payments":{}},{"name":"सम्यक भिर्के","fee":360,"batch":"सकाळ","payments":{}},{"name":"श्रेया गादेकर","fee":500,"batch":"सकाळ","payments":{}},{"name":"स्वरा पाटील","fee":360,"batch":"सकाळ","payments":{}},{"name":"स्वरूप पाटील","fee":360,"batch":"सकाळ","payments":{}},{"name":"तेजल पाटील","fee":550,"batch":"संध्याकाळ","payments":{}},{"name":"पूर्वा पाटील","fee":550,"batch":"संध्याकाळ","payments":{}},{"name":"संस्कृती","fee":500,"batch":"संध्याकाळ","payments":{}},{"name":"स्वरांश","fee":400,"batch":"संध्याकाळ","payments":{}}];
+  final months=["जून","जुलै","ऑगस्ट","सप्टेंबर","ऑक्टोबर","नोव्हेंबर","डिसेंबर","जानेवारी","फेब्रुवारी","मार्च","एप्रिल","मे"];
+  @override void initState(){ super.initState(); load(); }
+  Future<void> load() async { final p=await SharedPreferences.getInstance(); final d=p.getString('sc_final'); if(d!=null) setState(()=>students=List<Map<String,dynamic>>.from(jsonDecode(d))); }
+  Future<void> save() async { final p=await SharedPreferences.getInstance(); p.setString('sc_final', jsonEncode(students)); }
+  Widget logo(double s){ return ClipOval(child: Image.asset('assets/images/logo.png', width: s, height: s, fit: BoxFit.cover, errorBuilder: (c,e,st)=> Container(width:s,height:s, decoration: BoxDecoration(color: const Color(0xFF0A2351), shape: BoxShape.circle, border: Border.all(color: Colors.amber, width:2)), child: const Center(child: Text("SC", style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)))))); }
+  Widget profile(){ return SingleChildScrollView(padding: const EdgeInsets.all(20), child: Column(children:[ logo(170), const SizedBox(height:12), const Text("SAIKRUPA CLASSES", style: TextStyle(fontSize:24, fontWeight: FontWeight.bold, color: Color(0xFF0A2351))), const Text("॥ श्री साईनाथाय नमः ॥", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)), const Text("FAITH • DEVOTION • EDUCATION", style: TextStyle(fontSize:10, letterSpacing:2)), const SizedBox(height:20), Card(elevation:3, child: Padding(padding: const EdgeInsets.all(12), child: Column(children: const [ListTile(leading: Icon(Icons.location_on, color: Colors.orange), title: Text("Morya Park, Sangodi Road, Yelwadi, Karad")), Divider(), ListTile(leading: Icon(Icons.person, color: Colors.orange), title: Text("स्नेहल मॅडम - संचालिका")), Divider(), ListTile(leading: Icon(Icons.phone, color: Colors.orange), title: Text("संपर्क जोडा")), Divider(), ListTile(leading: Icon(Icons.verified, color: Colors.green), title: Text("12 Students | Trusted"))]))), const SizedBox(height:15), Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.amber.shade50, borderRadius: BorderRadius.circular(8)), child: const Text("प्रत्येक Receipt वर हा Logo येईल - हीच तुमची जाहिरात!", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontSize:12)))])); }
+  @override Widget build(BuildContext context){
+    var f=filter=="सगळे"?students:students.where((s)=>s['batch']==filter).toList();
+    return Scaffold(appBar: AppBar(title: Row(children:[logo(36), const SizedBox(width:8), const Text("SAIKRUPA CLASSES", style: TextStyle(fontSize:15, fontWeight: FontWeight.bold))]), backgroundColor: const Color(0xFF0A2351), foregroundColor: Colors.white), bottomNavigationBar: BottomNavigationBar(currentIndex:tab, onTap:(i)=>setState(()=>tab=i), selectedItemColor: const Color(0xFF0A2351), items: const [BottomNavigationBarItem(icon: Icon(Icons.groups), label:"विद्यार्थी"), BottomNavigationBarItem(icon: Icon(Icons.person), label:"प्रोफाइल")]), body: tab==1?profile():Column(children:[Container(color: Colors.amber.shade50, padding: const EdgeInsets.all(10), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children:[Text("एकूण: ${f.length}"), ToggleButtons(isSelected:[filter=="सगळे",filter=="सकाळ",filter=="संध्याकाळ"], onPressed:(i)=>setState(()=>filter=["सगळे","सकाळ","संध्याकाळ"][i]), children: const [Padding(padding: EdgeInsets.symmetric(horizontal:8), child: Text("सगळे")), Padding(padding: EdgeInsets.symmetric(horizontal:8), child: Text("सकाळ")), Padding(padding: EdgeInsets.symmetric(horizontal:8), child: Text("संध्या"))])])), Expanded(child: ListView.builder(itemCount:f.length, itemBuilder:(c,i){ var s=f[i]; int real=students.indexOf(s); int paid=(s['payments'] as Map).length; return Card(child: ListTile(onTap:()=>Navigator.push(context, MaterialPageRoute(builder:(_)=> Detail(student:s, months:months, onUpdate:(np){ setState(()=>students[real]['payments']=np); save(); }, logo: logo))), leading: logo(40), title: Text(s['name'], style: const TextStyle(fontWeight: FontWeight.bold)), subtitle: Text("${s['batch']} | ₹${s['fee']} | $paid/12"), trailing: Icon(paid==12? Icons.verified : Icons.arrow_forward_ios, size:14, color: paid==12? Colors.green : Colors.grey))); }))]));
   }
 }
-
-class StudentDetail extends StatefulWidget {
-  final Map<String, dynamic> student;
-  final List<String> months;
-  final Function(Map) onUpdate;
-  const StudentDetail({super.key, required this.student, required this.months, required this.onUpdate});
-  @override
-  State<StudentDetail> createState() => _StudentDetailState();
-}
-
-class _StudentDetailState extends State<StudentDetail> {
-  late Map payments;
-  final ScreenshotController screenshotController = ScreenshotController();
-  String lastPaidMonth = "";
-
-  @override
-  void initState() {
-    super.initState();
-    payments = Map.from(widget.student['payments']?? {});
-  }
-
-  Future<void> shareReceipt(String month) async {
-    setState(() => lastPaidMonth = month);
-    await Future.delayed(const Duration(milliseconds: 400));
-    final bytes = await screenshotController.capture();
-    if (bytes == null) return;
-    final dir = await getTemporaryDirectory();
-    final file = await File('${dir.path}/receipt.png').create();
-    await file.writeAsBytes(bytes);
-    await Share.shareXFiles([XFile(file.path)], text: '${widget.student['name']} - $month Fee Receipt');
-  }
-
-  Widget receiptWidget(String month) {
-    return Container(
-      width: 400,
-      color: const Color(0xFFFFFEF5),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          const Text('SAIKRUPA CLASSES', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0A2351))),
-          const SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            color: const Color(0xFF0A2351),
-            child: const Text('FEE RECEIPT', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, fontSize: 16)),
-          ),
-          const SizedBox(height: 15),
-          Text('Name: ${widget.student['name']}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text('Month: $month'),
-          const SizedBox(height: 8),
-          Text('Fee: ₹${widget.student['fee']}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          const Text('Thank You!'),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.student['name'])),
-      body: Column(
-        children: [
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: 2.2, crossAxisSpacing: 8, mainAxisSpacing: 8),
-              itemCount: widget.months.length,
-              itemBuilder: (c, i) {
-                String m = widget.months[i];
-                bool isPaid = payments.containsKey(m);
-                return InkWell(
-                  onTap: () {
-                    if (!isPaid) {
-                      setState(() => payments[m] = DateTime.now().toString());
-                      widget.onUpdate(payments);
-                    }
-                    shareReceipt(m);
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isPaid? Colors.green.shade100 : Colors.orange.shade50,
-                      border: Border.all(color: isPaid? Colors.green : Colors.orange),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(m, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                        Icon(isPaid? Icons.check_circle : Icons.pending, size: 18),
-                        Text(isPaid? "Paid" : "Pending", style: const TextStyle(fontSize: 10)),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          SizedBox(
-            height: 1,
-            child: SingleChildScrollView(
-              child: Screenshot(controller: screenshotController, child: receiptWidget(lastPaidMonth.isEmpty? widget.months[0] : lastPaidMonth)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+class Detail extends StatefulWidget{ final Map<String,dynamic> student; final List<String> months; final Function(Map) onUpdate; final Widget Function(double) logo; const Detail({super.key, required this.student, required this.months, required this.onUpdate, required this.logo}); @override State<Detail> createState()=> _DetailState(); }
+class _DetailState extends State<Detail>{
+  late Map pay; final sc=ScreenshotController(); String last="";
+  @override void initState(){ super.initState(); pay=Map.from(widget.student['payments']?? {}); }
+  Future<void> share(String m) async { setState(()=>last=m); await Future.delayed(const Duration(milliseconds:600)); final b=await sc.capture(); if(b==null) return; final d=await getTemporaryDirectory(); final f=await File('${d.path}/receipt.png').create(); await f.writeAsBytes(b); await Share.shareXFiles([XFile(f.path)], text: '${widget.student['name']} - $m Fee Paid - SAIKRUPA CLASSES KARAD 🙏 ॥ श्री साईनाथाय नमः ॥'); }
+  Widget receipt(String m){ return Container(width:600, color: Colors.white, padding: const EdgeInsets.all(16), child: Column(children:[ widget.logo(120), const SizedBox(height:8), const Text('SAIKRUPA CLASSES', style: TextStyle(fontSize:22, fontWeight: FontWeight.bold, color: Color(0xFF0A2351))), const Text('॥ श्री साईनाथाय नमः ॥', style: TextStyle(fontSize:11, color: Colors.orange)), const Text('FAITH • DEVOTION • EDUCATION', style: TextStyle(fontSize:8, letterSpacing:2)), const SizedBox(height:10), Container(width:double.infinity, padding: const EdgeInsets.symmetric(vertical:8), color: const Color(0xFF0A2351), child: const Text('FEE RECEIPT', textAlign: TextAlign.center, style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, letterSpacing:2))), const SizedBox(height:15), Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)), child: Column(children:[Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children:[const Text('Name:'), Text(widget.student['name'], style: const TextStyle(fontWeight: FontWeight.bold))]), const SizedBox(height:8), Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children:[const Text('Month:'), Text(m, style: const TextStyle(fontWeight: FontWeight.bold))]), const Divider(), Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children:[const Text('Amount:'), Text('₹${widget.student['fee']}', style: const TextStyle(fontSize:22, fontWeight: FontWeight.bold, color: Color(0xFF0A2351)))]), const SizedBox(height:10), Container(padding: const EdgeInsets.symmetric(horizontal:16, vertical:4), decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(20)), child: const Text('✓ PAID', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))])), const SizedBox(height:15), const Text('Thank You!', style: TextStyle(fontWeight: FontWeight.bold, fontSize:12)), Text('Morya Park, Karad | ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}', style: const TextStyle(fontSize:8, color: Colors.grey)) ])); }
+  @override Widget build(BuildContext context){ return Scaffold(appBar: AppBar(title: Text(widget.student['name']), backgroundColor: const Color(0xFF0A2351), foregroundColor: Colors.white), body: Column(children:[Expanded(child: GridView.builder(padding: const EdgeInsets.all(12), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:3, childAspectRatio:2.1, crossAxisSpacing:8, mainAxisSpacing:8), itemCount:widget.months.length, itemBuilder:(c,i){ String m=widget.months[i]; bool p=pay.containsKey(m); return InkWell(onTap:(){ if(!p){ setState(()=>pay[m]=DateTime.now().toString()); widget.onUpdate(pay); } share(m); }, child: Container(decoration: BoxDecoration(color: p? Colors.green.shade50 : Colors.white, border: Border.all(color: p? Colors.green : Colors.orange.shade200), borderRadius: BorderRadius.circular(10)), child: Column(mainAxisAlignment: MainAxisAlignment.center, children:[Text(m, style: const TextStyle(fontSize:11, fontWeight: FontWeight.bold)), Icon(p? Icons.verified : Icons.hourglass_bottom, size:16, color: p? Colors.green : Colors.orange), Text(p?"Paid":"Pending", style: const TextStyle(fontSize:9))]))); })), Offstage(child: Screenshot(controller:sc, child: receipt(last.isEmpty? widget.months[0] : last))) ])); }
 }
