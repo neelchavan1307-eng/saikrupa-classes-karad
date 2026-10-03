@@ -9,7 +9,7 @@ jobs:
         with:
           flutter-version: '3.22.3'
       - run: rm -rf android
-      - run: flutter create --platforms=android --org com.saikrupa --project-name saikrupa_classes_karad.
+      - run: flutter create --platforms=android --org com.saikrupa --project-name saikrupa_classes_karad .
       - run: sed -i "s/ext.kotlin_version.*/ext.kotlin_version = '1.9.22'/" android/build.gradle
       - run: flutter pub get
       - run: flutter build apk --release --no-tree-shake-icons
