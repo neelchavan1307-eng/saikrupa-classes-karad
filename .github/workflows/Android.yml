@@ -1,5 +1,5 @@
 name: android
-on: [push, workflow_dispatch]
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -8,19 +8,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.3'
-
-      - name: Clean Android
-        run: rm -rf android
-
-      - name: Recreate Android
-        run: flutter create . --platforms=android --org com.saikrupa --project-name saikrupa_classes_karad
-
-      - name: Fix Kotlin
-        run: sed -i "s/ext.kotlin_version.*/ext.kotlin_version = '1.9.22'/" android/build.gradle
-
+      - run: rm -rf android
+      - run: flutter create. --platforms=android --org com.saikrupa --project-name saikrupa_classes_karad
+      - run: sed -i "s/ext.kotlin_version.*/ext.kotlin_version = '1.9.22'/" android/build.gradle
       - run: flutter pub get
       - run: flutter build apk --release --no-tree-shake-icons
-
       - uses: actions/upload-artifact@v4
         with:
           name: Saikrupa-APK
