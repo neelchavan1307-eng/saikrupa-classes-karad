@@ -10,7 +10,7 @@ jobs:
           flutter-version: '3.22.3'
       - run: |
           rm -rf android
-          flutter create --platforms=android --org com.saikrupa --project-name saikrupa_classes_karad --overwrite./
+          flutter create --platforms=android --org com.saikrupa --project-name saikrupa_classes_karad --overwrite ./
       - run: flutter pub get
       - run: flutter build apk --release --no-tree-shake-icons
       - uses: actions/upload-artifact@v4
