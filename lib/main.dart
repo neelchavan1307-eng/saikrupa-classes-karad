@@ -261,4 +261,4 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 12),
           TextField(onChanged: (v)=>setState(()=>search=v), decoration: InputDecoration(hintText: 'विद्यार्थी शोधा...', prefixIcon: const Icon(Icons.search), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), filled: true, fillColor: Colors.white)),
           const SizedBox(height: 10),
-          SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [_fBtn('सर्व (${students.length})','सर्व'), _fBtn('बाकी (${students.where((s)=>s.paidMonths.length<12).length})','बाकी'), _fBtn('संपलेला (${stu2
+          SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [_fBtn('सर्व (${students.length})','सर्व'), _fBtn('बाकी (${students.where((s)=>s.paidMonths.length<12).length})','बाकी'), _fBtn('संपलेला (${stu
