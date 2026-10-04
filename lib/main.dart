@@ -1,4 +1,4 @@
-// PART 1 START - Saikrupa Classes Karad
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,7 +56,6 @@ class _HomePageState extends State<HomePage> {
     final msg='Hello ${s.name}, Your fee balance Rs $bal is pending at $appName. Please pay soon. Contact: $phNo';
     await Share.share(msg);
   }
-// PART 1 END - आता PART 2 खाली Paste करा// PART 2 START - याला PART 1 च्या खाली Paste करा
   void _addStudentDialog(){
     final n=TextEditingController(); final ph=TextEditingController(); final f=TextEditingController(text:"1000");
     showDialog(context:context, builder:(_)=>AlertDialog(title:const Text("Add Student"), content:Column(mainAxisSize:MainAxisSize.min, children:[
