@@ -1,19 +1,16 @@
-name: saikrupa_classes_karad
-description: "Saikrupa Classes Karad App"
+name: saikrupa_classes
+description: Saikrupa Classes Karad - Fee Register App
 publish_to: 'none'
-version: 2.0.0+2
+version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  shared_preferences: ^2.3.2
-  screenshot: ^3.0.0
-  share_plus: ^9.0.0
-  path_provider: ^2.1.3
+  webview_flutter: ^4.8.0
 
 dev_dependencies:
   flutter_test:
@@ -22,5 +19,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/
