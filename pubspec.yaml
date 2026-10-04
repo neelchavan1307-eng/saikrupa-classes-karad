@@ -2,7 +2,7 @@ name: saikrupa_classes_karad
 publish_to: 'none'
 version: 1.0.9+10
 environment:
-  sdk: ">=3.4.0 <4.0.0"
+  sdk: '>=3.4.0 <4.0.0'
 dependencies:
   flutter:
     sdk: flutter
