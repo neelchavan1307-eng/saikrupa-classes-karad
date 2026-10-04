@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';1
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -261,4 +261,24 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 12),
           TextField(onChanged: (v)=>setState(()=>search=v), decoration: InputDecoration(hintText: 'विद्यार्थी शोधा...', prefixIcon: const Icon(Icons.search), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), filled: true, fillColor: Colors.white)),
           const SizedBox(height: 10),
-          SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [_fBtn('सर्व (${students.length})','सर्व'), _fBtn('बाकी (${students.where((s)=>s.paidMonths.length<12).length})','बाकी'), _fBtn('संपलेला (${stu
+          SingleChildScrollView(scrollDirection: Axis.horizontal, child: Row(children: [_fBtn('सर्व (${students.length})','सर्व'), _fBtn('बाकी (${students.where((s)=>s.paidMonths.length<12).length})','बाकी'), _fBtn('संपलेला (${stu_sampलेला (${students.where((s)=>s.paidMonths.length==12).length})','संपलेला')])),
+          const SizedBox(height: 10),...filtered.asMap().entries.map((e)=> _studentCard(e.key+1, e.value)),
+        ])),
+      ])),
+    );
+  }
+  Widget _dash(String t,String v,String sub,Color c)=>Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.black12)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(t, style: const TextStyle(fontSize: 10)), const SizedBox(height: 4), Text(v, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), if(sub.isNotEmpty) Text(sub, style: const TextStyle(fontSize: 9))]));
+  Widget _fBtn(String l,String val){ bool sel=filter==val; return Padding(padding: const EdgeInsets.only(right:6), child: ChoiceChip(label: Text(l, style: TextStyle(fontSize:12, color: sel?Colors.white:Colors.black)), selected: sel, selectedColor: Colors.green, onSelected: (v){ setState(()=> filter=val); })); }
+  Widget _studentCard(int index, Student s){
+    int paid=s.paidMonths.length*s.fee; int bal=(12-s.paidMonths.length)*s.fee;
+    return GestureDetector(onLongPress: ()=>_addOrEditStudent(edit: s, idx: students.indexOf(s)), child: Container(margin: const EdgeInsets.only(bottom:10), padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), boxShadow: [const BoxShadow(color: Colors.black12, blurRadius:3)]), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [Text('$index', style: const TextStyle(fontWeight: FontWeight.bold)), const SizedBox(width:8), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('${s.name} | वय ${s.age}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize:13)), Text('नोंदणी / ${s.month}${s.phone.isNotEmpty?" | ${s.phone}":""}', style: const TextStyle(fontSize:10, color: Colors.grey))])), Column(children: [Container(padding: const EdgeInsets.symmetric(horizontal:6, vertical:2), decoration: BoxDecoration(color: s.paidMonths.length<12?Colors.orange.shade100:Colors.green.shade100, borderRadius: BorderRadius.circular(10)), child: Text(s.paidMonths.length<12?'Fee बाकी':'Paid', style: TextStyle(fontSize:9, color: s.paidMonths.length<12?Colors.orange:Colors.green))), const SizedBox(height:4), Container(padding: const EdgeInsets.symmetric(horizontal:8, vertical:2), decoration: BoxDecoration(color: Colors.green.shade100, borderRadius: BorderRadius.circular(10)), child: Text('₹${s.fee}', style: const TextStyle(fontSize:11, fontWeight: FontWeight.bold)))])]),
+      const SizedBox(height:10),
+      GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:6, childAspectRatio:1.3, crossAxisSpacing:4, mainAxisSpacing:4), itemCount:12, itemBuilder: (c,i){ bool isPaid=s.paidMonths.contains(months[i]); return InkWell(onTap: (){ if(isPaid) _showDigitalReceipt(s, months[i]); else { setState(()=> s.paidMonths.add(months[i])); _save(); _showDigitalReceipt(s, months[i]); } }, child: Container(decoration: BoxDecoration(color: isPaid?Colors.green:Colors.red.shade100, borderRadius: BorderRadius.circular(6), border: Border.all(color: isPaid?Colors.green:Colors.red.shade200)), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text(months[i], style: TextStyle(fontSize:11, fontWeight: FontWeight.bold, color: isPaid?Colors.white:Colors.red)), Text(isPaid?'✓':'x', style: TextStyle(fontSize:9, color: isPaid?Colors.white:Colors.red)), Text(monthNames[i], style: TextStyle(fontSize:6, color: isPaid?Colors.white70:Colors.red))]))); }),
+      const SizedBox(height:8),
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('जमा\n₹$paid', style: const TextStyle(fontSize:10, fontWeight: FontWeight.bold)), Text('बाकी\n₹$bal', style: const TextStyle(fontSize:10, fontWeight: FontWeight.bold, color: Colors.red)), Row(children: [InkWell(onTap: (){ if(s.paidMonths.isNotEmpty) _showDigitalReceipt(s, s.paidMonths.last); }, child: _b('पावती', Colors.blue)), InkWell(onTap: ()=>_addOrEditStudent(edit: s, idx: students.indexOf(s)), child: _b('माहिती', Colors.orange)), InkWell(onTap: ()=>_whatsappBal(s), child: _b('WhatsApp', Colors.green))])]),
+      const SizedBox(height:4), const Text('महिन्यावर Click करा - Digital पावती येईल', style: TextStyle(fontSize:7, color: Colors.grey)),
+    ])));
+  }
+  Widget _b(String t, Color c)=>Container(margin: const EdgeInsets.only(left:4), padding: const EdgeInsets.symmetric(horizontal:8, vertical:4), decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(15)), child: Text(t, style: const TextStyle(color: Colors.white, fontSize:10)));
+                                                                                                                                                                                                                                                 }
