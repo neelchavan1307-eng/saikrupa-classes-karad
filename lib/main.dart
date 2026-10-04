@@ -12,7 +12,7 @@ class SaikrupaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Fee Register',
+      title: 'Saikrupa Classes',
       theme: ThemeData(primarySwatch: Colors.orange),
       home: const WebViewPage(),
     );
@@ -27,16 +27,19 @@ class WebViewPage extends StatefulWidget {
 
 class _WebViewPageState extends State<WebViewPage> {
   late final WebViewController controller;
-  bool loading = true;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(NavigationDelegate(
-        onPageFinished: (_) => setState(() => loading = false),
-      ))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (_) => setState(() => isLoading = false),
+        ),
+      )
+      // --- तुमची Final Public Link ---
       ..loadRequest(Uri.parse('https://fee-register20262.ai.studio'));
   }
 
@@ -47,7 +50,7 @@ class _WebViewPageState extends State<WebViewPage> {
         child: Stack(
           children: [
             WebViewWidget(controller: controller),
-            if (loading) const Center(child: CircularProgressIndicator(color: Colors.deepOrange)),
+            if (isLoading) const Center(child: CircularProgressIndicator(color: Colors.deepOrange)),
           ],
         ),
       ),
