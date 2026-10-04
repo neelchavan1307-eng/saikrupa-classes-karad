@@ -1,66 +1,110 @@
+// PART 1 START - Saikrupa Classes Karad
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
-void main()=>runApp(const MyApp());
-class MyApp extends StatelessWidget{const MyApp({super.key});@override Widget build(BuildContext c)=>const MaterialApp(debugShowCheckedModeBanner:false,home:HomePage());}
-class Student{String name;int age;String month;int fee;List<String> paid;String phone;Student({required this.name,required this.age,required this.month,required this.fee,required this.paid,this.phone=''});Map<String,dynamic> toJson()=>{'name':name,'age':age,'month':month,'fee':fee,'paid':paid,'phone':phone};factory Student.fromJson(Map<String,dynamic> j)=>Student(name:j['name'],age:j['age'],month:j['month'],fee:j['fee'],paid:List<String>.from(j['paid']),phone:j['phone']??'');}
-class HomePage extends StatefulWidget{const HomePage({super.key});@override State<HomePage> createState()=>_H();}
-class _H extends State<HomePage>{
-List<Student> st=[];String fil='all';String sea='';String cN='SAIKRUPA CLASSES';String tN='Prof. Pradip Chavan';String loc='Karad';String phNo='9822001122';String? dp;
-final mos=['J','F','M','A','M','J','J','A','S','O','N','D'];final mN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-@override void initState(){super.initState();_load();}
-Future<void> _load() async{final p=await SharedPreferences.getInstance();final d=p.getString('st');if(d!=null){st=(jsonDecode(d) as List).map((e)=>Student.fromJson(e)).toList();}else{st=[Student(name:'Vihan Tupe',age:6,month:'Sep 2025',fee:1000,paid:['J','F','M','A']),Student(name:'Krisha Kirme',age:10,month:'Sep 2025',fee:1200,paid:['J','F','M']),Student(name:'Anshuman Itape',age:10,month:'Sep 2025',fee:1000,paid:[]),Student(name:'Aaradhya Yadav',age:8,month:'Sep 2025',fee:1000,paid:['J','F','M','A','M','J','J','A','S']),Student(name:'Samyak Shirke',age:5,month:'Sep 2025',fee:800,paid:['J','F','M','A','M','J','J','A','S']),Student(name:'Shreya Gadekar',age:11,month:'Sep 2025',fee:800,paid:['J','F','M','A','M','J','J','A','S','O','N']),Student(name:'Swara Patil',age:3,month:'Sep 2025',fee:800,paid:['J']),Student(name:'Swaroop Patil',age:3,month:'Sep 2025',fee:800,paid:['J','F','M','A','M']),Student(name:'Tejal Patil',age:25,month:'Sep 2025',fee:1500,paid:['J','F']),Student(name:'Poorva Patil',age:20,month:'Sep 2025',fee:1500,paid:['J','F','M','A','M','J','J','A','S','O']),Student(name:'Samskurti',age:14,month:'Sep 2025',fee:1200,paid:['J','F','M','A','M','J','J','A','S','O']),Student(name:'Swaransh',age:10,month:'Sep 2025',fee:1000,paid:['J','F','M']),];}
-cN=p.getString('cN')??cN;tN=p.getString('tN')??tN;loc=p.getString('loc')??loc;phNo=p.getString('phNo')??phNo;dp=p.getString('dp');setState((){});}
-Future<void> _save() async{final p=await SharedPreferences.getInstance();p.setString('st',jsonEncode(st.map((e)=>e.toJson()).toList()));p.setString('cN',cN);p.setString('tN',tN);p.setString('loc',loc);p.setString('phNo',phNo);if(dp!=null)p.setString('dp',dp!);}
-Future<void> _pick() async{final x=await ImagePicker().pickImage(source:ImageSource.gallery,imageQuality:60);if(x!=null){final b=await x.readAsBytes();setState(()=>dp=base64Encode(b));_save();}}
-void _receipt(Student s,String mc){
-int idx=mos.indexOf(mc);String mn=mN[idx];int fee=s.fee;String date="${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";String rNo="#SK-${DateTime.now().millisecondsSinceEpoch%10000}";
-showDialog(context:context,builder:(_)=>Dialog(insetPadding:const EdgeInsets.all(12),child:SingleChildScrollView(child:Container(padding:const EdgeInsets.all(16),child:Column(children:[
-Container(padding:const EdgeInsets.all(12),decoration:BoxDecoration(border:Border.all(color:Colors.orange,width:2),borderRadius:BorderRadius.circular(12)),child:Column(children:[
-Row(children:[Image.asset('assets/logo.png',width:55,height:55,errorBuilder:(a,b,c)=>const Icon(Icons.school,size:40)),const SizedBox(width:10),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(cN,style:const TextStyle(fontWeight:FontWeight.bold)),Text(tN,style:const TextStyle(fontSize:12,color:Colors.red)),Text(loc,style:const TextStyle(fontSize:10)),Text('Ph: $phNo',style:const TextStyle(fontSize:10))]))]),
-const Divider(thickness:2,color:Colors.orange),const Text('FEE RECEIPT',style:TextStyle(fontWeight:FontWeight.bold,color:Colors.green)),const Divider(),Column(children:[
-Row(children:[const SizedBox(width:70,child:Text('Receipt:')),Text(rNo,style:const TextStyle(fontWeight:FontWeight.bold))]),
-Row(children:[const SizedBox(width:70,child:Text('Date:')),Text(date)]),
-Row(children:[const SizedBox(width:70,child:Text('Student:')),Expanded(child:Text(s.name,style:const TextStyle(fontWeight:FontWeight.bold)))]),
-Row(children:[const SizedBox(width:70,child:Text('Month:')),Text('$mn 2025',style:const TextStyle(fontWeight:FontWeight.bold,color:Colors.green))]),
-Row(children:[const SizedBox(width:70,child:Text('Amount:')),Text('Rs $fee/- PAID',style:const TextStyle(fontWeight:FontWeight.bold,color:Colors.green))]),
-]),
-const SizedBox(height:12),Container(width:double.infinity,padding:const EdgeInsets.all(10),decoration:BoxDecoration(color:Colors.green.shade50,borderRadius:BorderRadius.circular(8)),child:const Text('Fee Received, Thank you!',textAlign:TextAlign.center,style:TextStyle(fontWeight:FontWeight.bold))),
-])),
-const SizedBox(height:14),
-Row(children:[Expanded(child:ElevatedButton(onPressed:()=>Navigator.pop(context),child:const Text('Close'))),const SizedBox(width:8),Expanded(flex:2,child:ElevatedButton.icon(onPressed:(){Navigator.pop(context);_share(s,mn,fee,date,rNo);},icon:const Icon(Icons.send),label:const Text('WhatsApp'),style:ElevatedButton.styleFrom(backgroundColor:Colors.green,foregroundColor:Colors.white)))])
-])))));
+
+void main() => runApp(const SaikrupaApp());
+
+const String phNo = "9822001122";
+const String appName = "SAIKRUPA CLASSES, KARAD";
+
+class Student {
+  String name;
+  String phone;
+  int fee;
+  List<String> paid;
+  Student({required this.name, required this.phone, required this.fee, required this.paid});
+  Map<String,dynamic> toJson() => {"name":name,"phone":phone,"fee":fee,"paid":paid};
+  factory Student.fromJson(Map<String,dynamic> j) => Student(name:j["name"],phone:j["phone"]??"",fee:j["fee"],paid:List<String>.from(j["paid"]??[]));
 }
-Future<void> _share(Student s,String mn,int fee,String date,String rNo) async{final msg="*${cN} - Digital Receipt*\nReceipt: $rNo\nDate: $date\nStudent: ${s.name}\nMonth: $mn 2025\nAmount: Rs $fee/- PAID\nThank you!\n${cN} - $phNo";final url=Uri.parse("https://wa.me/${s.phone.isNotEmpty?'91${s.phone}':''}?text=${Uri.encodeComponent(msg)}");if(await canLaunchUrl(url))await launchUrl(url,mode:LaunchMode.externalApplication);}
-Future<void> _waBal(Student s) async{int bal=(12-s.paid.length)*s.fee;final msg='Hello, ${s.name} fee balance Rs $bal. $cN - $phNo';final url=Uri.parse('https://wa.me/${s.phone.isNotEmpty?'91${s.phone}':''}?text=${Uri.encodeComponent(msg)}');if(await canLaunchUrl(url))await launchUrl(url,mode:LaunchMode.externalApplication);}
-void _editP(){final c1=TextEditingController(text:cN);final c2=TextEditingController(text:tN);final c3=TextEditingController(text:loc);final c4=TextEditingController(text:phNo);showDialog(context:context,builder:(_)=>AlertDialog(title:const Text('Edit Profile'),content:Column(mainAxisSize:MainAxisSize.min,children:[GestureDetector(onTap:(){Navigator.pop(context);_pick();},child:dp==null?Image.asset('assets/logo.png',width:80,height:80,errorBuilder:(a,b,c)=>const CircleAvatar(radius:40,child:Icon(Icons.camera_alt))):CircleAvatar(radius:40,backgroundImage:MemoryImage(base64Decode(dp!)))),TextField(controller:c1,decoration:const InputDecoration(labelText:'Class')),TextField(controller:c2,decoration:const InputDecoration(labelText:'Teacher')),TextField(controller:c3,decoration:const InputDecoration(labelText:'Location')),TextField(controller:c4,decoration:const InputDecoration(labelText:'Phone'))]),actions:[TextButton(onPressed:()=>Navigator.pop(context),child:const Text('Cancel')),ElevatedButton(onPressed:(){setState((){cN=c1.text;tN=c2.text;loc=c3.text;phNo=c4.text;});_save();Navigator.pop(context);},child:const Text('Save'))]));}
-void _ae({Student? ed,int? id}){final n=TextEditingController(text:ed?.name??'');final a=TextEditingController(text:ed?.age.toString()??'');final f=TextEditingController(text:ed?.fee.toString()??'');final ph=TextEditingController(text:ed?.phone??'');showDialog(context:context,builder:(_)=>AlertDialog(title:Text(ed==null?'+ New Student':'Edit'),content:Column(mainAxisSize:MainAxisSize.min,children:[TextField(controller:n,decoration:const InputDecoration(labelText:'Name')),TextField(controller:a,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Age')),TextField(controller:f,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'Fee')),TextField(controller:ph,decoration:const InputDecoration(labelText:'Phone'))]),actions:[if(ed!=null)TextButton(onPressed:(){setState(()=>st.removeAt(id!));_save();Navigator.pop(context);},child:const Text('Delete',style:TextStyle(color:Colors.red))),TextButton(onPressed:()=>Navigator.pop(context),child:const Text('Cancel')),ElevatedButton(onPressed:(){if(n.text.isEmpty)return;final s=Student(name:n.text,age:int.tryParse(a.text)??10,month:'Sep 2025',fee:int.tryParse(f.text)??1000,paid:ed?.paid??[],phone:ph.text);setState((){if(ed==null)st.add(s);else st[id!]=s;});_save();Navigator.pop(context);},child:Text(ed==null?'Add':'Save'))]));}
-List<Student> get filt{return st.where((s){bool m=sea.isEmpty||s.name.toLowerCase().contains(sea.toLowerCase());bool ff=true;if(fil=='due')ff=s.paid.length<12;if(fil=='paid')ff=s.paid.length==12;return m&&ff;}).toList();}
-@override Widget build(BuildContext c){
-return Scaffold(backgroundColor:const Color(0xFFF8F9FA),appBar:AppBar(backgroundColor:Colors.white,title:Row(children:[Image.asset('assets/logo.png',width:36,height:36,errorBuilder:(a,b,e)=>const Icon(Icons.school)),const SizedBox(width:8),Text(cN,style:const TextStyle(fontSize:13,fontWeight:FontWeight.bold))]),actions:[IconButton(onPressed:()=>_ae(),icon:const Icon(Icons.person_add,color:Colors.green)),IconButton(onPressed:_editP,icon:const Icon(Icons.edit,color:Colors.blue))]),
-body:SingleChildScrollView(child:Column(children:[
-Container(width:double.infinity,decoration:const BoxDecoration(gradient:LinearGradient(colors:[Color(0xFFFF9800),Color(0xFFE040FB)])),child:Container(margin:const EdgeInsets.all(12),padding:const EdgeInsets.all(16),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(20)),child:Column(children:[
-GestureDetector(onTap:_pick,child:Stack(children:[dp==null?Image.asset('assets/logo.png',width:90,height:90,errorBuilder:(a,b,e)=>const CircleAvatar(radius:45,child:Icon(Icons.person,size:40))):CircleAvatar(radius:45,backgroundImage:MemoryImage(base64Decode(dp!))),Positioned(bottom:0,right:0,child:Container(padding:const EdgeInsets.all(6),decoration:const BoxDecoration(color:Colors.blue,shape:BoxShape.circle),child:const Icon(Icons.camera_alt,size:16,color:Colors.white)))])),const SizedBox(height:8),Text(cN,style:const TextStyle(fontWeight:FontWeight.bold,fontSize:18)),Text(tN,style:const TextStyle(color:Colors.red)),ElevatedButton(onPressed:()=>_ae(),style:ElevatedButton.styleFrom(backgroundColor:Colors.green),child:const Text('+ New Student',style:TextStyle(color:Colors.white)))
-]))),
-Padding(padding:const EdgeInsets.all(12),child:Column(children:[
-Row(children:[Expanded(child:Container(padding:const EdgeInsets.all(12),decoration:BoxDecoration(color:Colors.blue.shade50,borderRadius:BorderRadius.circular(12)),child:Column(children:[const Text('Students',style:TextStyle(fontSize:10)),Text('${st.length}',style:const TextStyle(fontWeight:FontWeight.bold))]))),const SizedBox(width:8),Expanded(child:Container(padding:const EdgeInsets.all(12),decoration:BoxDecoration(color:Colors.green.shade50,borderRadius:BorderRadius.circular(12)),child:Column(children:[const Text('Total Paid',style:TextStyle(fontSize:10)),Text('Rs ${st.fold(0,(a,b)=>a+b.paid.length*b.fee)}',style:const TextStyle(fontWeight:FontWeight.bold))])))]),
-const SizedBox(height:8),
-TextField(onChanged:(v)=>setState(()=>sea=v),decoration:InputDecoration(hintText:'Search...',prefixIcon:const Icon(Icons.search),border:OutlineInputBorder(borderRadius:BorderRadius.circular(12)),filled:true,fillColor:Colors.white)),
-const SizedBox(height:10),
-Row(children:[ChoiceChip(label:Text('All (${st.length})'),selected:fil=='all',onSelected:(_)=>setState(()=>fil='all')),const SizedBox(width:6),ChoiceChip(label:Text('Due (${st.where((s)=>s.paid.length<12).length})'),selected:fil=='due',onSelected:(_)=>setState(()=>fil='due')),const SizedBox(width:6),ChoiceChip(label:Text('Done (${st.where((s)=>s.paid.length==12).length})'),selected:fil=='paid',onSelected:(_)=>setState(()=>fil='paid')),]),
-const SizedBox(height:10),
-...filt.asMap().entries.map((e){int idx=e.key+1;Student s=e.value;int paid=s.paid.length*s.fee;int bal=(12-s.paid.length)*s.fee;return Container(margin:const EdgeInsets.only(bottom:10),padding:const EdgeInsets.all(12),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(12)),child:Column(children:[
-Row(children:[Text('$idx',style:const TextStyle(fontWeight:FontWeight.bold)),const SizedBox(width:8),Expanded(child:Text('${s.name} | Age ${s.age}',style:const TextStyle(fontWeight:FontWeight.bold))),Text('Rs ${s.fee}')]),
-const SizedBox(height:8),
-GridView.builder(shrinkWrap:true,physics:const NeverScrollableScrollPhysics(),gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:6,childAspectRatio:1.3,crossAxisSpacing:4,mainAxisSpacing:4),itemCount:12,itemBuilder:(bc,i){bool ok=s.paid.contains(mos[i]);return InkWell(onTap:(){if(ok){_receipt(s,mos[i]);}else{setState(()=>s.paid.add(mos[i]));_save();_receipt(s,mos[i]);}},child:Container(decoration:BoxDecoration(color:ok?Colors.green:Colors.red.shade100,borderRadius:BorderRadius.circular(6)),child:Center(child:Text(mos[i],style:TextStyle(color:ok?Colors.white:Colors.red,fontWeight:FontWeight.bold)))));}),
-const SizedBox(height:8),
-Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[Text('Paid Rs $paid',style:const TextStyle(fontSize:10)),Text('Bal Rs $bal',style:const TextStyle(fontSize:10,color:Colors.red)),Row(children:[InkWell(onTap:(){if(s.paid.isNotEmpty)_receipt(s,s.paid.last);},child:Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color:Colors.blue,borderRadius:BorderRadius.circular(12)),child:const Text('Receipt',style:TextStyle(color:Colors.white,fontSize:10)))),const SizedBox(width:4),InkWell(onTap:()=>_ae(ed:s,id:st.indexOf(s)),child:Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color:Colors.orange,borderRadius:BorderRadius.circular(12)),child:const Text('Edit',style:TextStyle(color:Colors.white,fontSize:10)))),const SizedBox(width:4),InkWell(onTap:()=>_waBal(s),child:Container(padding:const EdgeInsets.symmetric(horizontal:8,vertical:4),decoration:BoxDecoration(color:Colors.green,borderRadius:BorderRadius.circular(12)),child:const Text('WA',style:TextStyle(color:Colors.white,fontSize:10))))])])
-]));}),
-])),
-])),
-);
+
+class SaikrupaApp extends StatelessWidget {
+  const SaikrupaApp({super.key});
+  @override Widget build(BuildContext context) {
+    return MaterialApp(debugShowCheckedModeBanner:false, title:appName, theme:ThemeData(primarySwatch:Colors.indigo), home:const HomePage());
+  }
 }
+
+class HomePage extends StatefulWidget { const HomePage({super.key}); @override State<HomePage> createState()=> _HomePageState(); }
+
+class _HomePageState extends State<HomePage> {
+  List<Student> students=[];
+  final List<String> months=["J","F","M","A","M","J","J","A","S","O","N","D"];
+  final List<String> monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  @override void initState(){ super.initState(); _load(); }
+
+  Future<void> _load() async {
+    final p=await SharedPreferences.getInstance();
+    final s=p.getString("students");
+    if(s!=null){ setState(()=> students=(jsonDecode(s) as List).map((e)=>Student.fromJson(e)).toList()); }
+  }
+  Future<void> _save() async {
+    final p=await SharedPreferences.getInstance();
+    p.setString("students", jsonEncode(students.map((e)=>e.toJson()).toList()));
+  }
+
+  Future<void> _share(Student s,String mn,int fee,String date,String rNo) async{
+    final msg="*$appName - Digital Receipt*\n\nReceipt No: $rNo\nDate: $date\nStudent: ${s.name}\nPhone: ${s.phone}\nMonth: $mn 2025\nAmount: Rs $fee/- PAID\n\nThank you!\n$appName - $phNo";
+    await Share.share(msg);
+  }
+  Future<void> _waBal(Student s) async{
+    int bal=(12-s.paid.length)*s.fee;
+    final msg='Hello ${s.name}, Your fee balance Rs $bal is pending at $appName. Please pay soon. Contact: $phNo';
+    await Share.share(msg);
+  }
+// PART 1 END - आता PART 2 खाली Paste करा// PART 2 START - याला PART 1 च्या खाली Paste करा
+  void _addStudentDialog(){
+    final n=TextEditingController(); final ph=TextEditingController(); final f=TextEditingController(text:"1000");
+    showDialog(context:context, builder:(_)=>AlertDialog(title:const Text("Add Student"), content:Column(mainAxisSize:MainAxisSize.min, children:[
+      TextField(controller:n, decoration:const InputDecoration(labelText:"Name")),
+      TextField(controller:ph, decoration:const InputDecoration(labelText:"Phone (10 digit)"), keyboardType:TextInputType.phone),
+      TextField(controller:f, decoration:const InputDecoration(labelText:"Monthly Fee"), keyboardType:TextInputType.number),
+    ]), actions:[TextButton(onPressed:()=>Navigator.pop(context), child:const Text("Cancel")), ElevatedButton(onPressed:(){ if(n.text.isNotEmpty){ setState(()=>students.add(Student(name:n.text, phone:ph.text, fee:int.tryParse(f.text)??1000, paid:[]))); _save(); Navigator.pop(context);} }, child:const Text("Add"))]));
+  }
+
+  void _showReceipt(Student s, int monthIndex){
+    final now=DateTime.now();
+    final rNo="SK${now.millisecondsSinceEpoch.toString().substring(7)}";
+    final date="${now.day}/${now.month}/${now.year}";
+    final mn=monthNames[monthIndex];
+    showDialog(context:context, builder:(_)=>AlertDialog(title:const Text("Receipt"), content:Column(mainAxisSize:MainAxisSize.min, crossAxisAlignment:CrossAxisAlignment.start, children:[
+      Text("Receipt: $rNo"), Text("Date: $date"), Text("Student: ${s.name}"), Text("Month: $mn"), Text("Amount: Rs ${s.fee} PAID"), const SizedBox(height:10), const Text("SAIKRUPA CLASSES, KARAD", style:TextStyle(fontWeight:FontWeight.bold)),
+    ]), actions:[
+      TextButton(onPressed:()=>Navigator.pop(context), child:const Text("Close")),
+      ElevatedButton.icon(icon:const Icon(Icons.share), label:const Text("WhatsApp / Share"), onPressed:()=>_share(s,mn,s.fee,date,rNo))
+    ]));
+  }
+
+  @override Widget build(BuildContext context){
+    return Scaffold(
+      appBar:AppBar(title:const Text(appName), actions:[IconButton(icon:const Icon(Icons.add), onPressed:_addStudentDialog)]),
+      body:students.isEmpty? const Center(child:Text("No Students - Click + to Add")) : ListView.builder(itemCount:students.length, itemBuilder:(c,i){
+        final s=students[i];
+        return Card(margin:const EdgeInsets.all(6), child:ListTile(
+          title:Text(s.name, style:const TextStyle(fontWeight:FontWeight.bold)),
+          subtitle:Column(crossAxisAlignment:CrossAxisAlignment.start, children:[
+            Text("Phone: ${s.phone} | Fee: ${s.fee}"),
+            const SizedBox(height:6),
+            Wrap(spacing:4, children:List.generate(12, (m){
+              final isPaid=s.paid.contains(months[m]);
+              return GestureDetector(
+                onTap:(){
+                  setState((){
+                    if(isPaid) s.paid.remove(months[m]); else { s.paid.add(months[m]); _showReceipt(s,m); }
+                  }); _save();
+                },
+                child:CircleAvatar(radius:14, backgroundColor:isPaid?Colors.green:Colors.grey[300], child:Text(months[m], style:TextStyle(fontSize:10, color:isPaid?Colors.white:Colors.black))),
+              );
+            }))
+          ]),
+          trailing:IconButton(icon:const Icon(Icons.message, color:Colors.green), onPressed:()=>_waBal(s)),
+        ));
+      }),
+    );
+  }
 }
+// PART 2 END - आता Commit करा
