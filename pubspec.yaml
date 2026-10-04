@@ -1,3 +1,11 @@
+name: saikrupa_classes_karad
+description: Saikrupa Classes Karad App with Digital Image Receipt and WhatsApp
+publish_to: 'none'
+version: 1.0.6+7
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
 dependencies:
   flutter:
     sdk: flutter
@@ -6,3 +14,8 @@ dependencies:
   image_picker: ^1.0.7
   share_plus: ^7.2.1
   path_provider: ^2.1.2
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logo.png
