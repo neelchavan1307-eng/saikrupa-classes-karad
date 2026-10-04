@@ -3,17 +3,17 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const SaikrupaApp());
+  runApp(const MyApp());
 }
 
-class SaikrupaApp extends StatelessWidget {
-  const SaikrupaApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Saikrupa Classes',
-      theme: ThemeData(primarySwatch: Colors.orange),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.deepOrange),
       home: const WebViewPage(),
     );
   }
@@ -34,24 +34,35 @@ class _WebViewPageState extends State<WebViewPage> {
     super.initState();
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageFinished: (_) => setState(() => isLoading = false),
+          onPageStarted: (url) => setState(() => isLoading = true),
+          onPageFinished: (url) => setState(() => isLoading = false),
         ),
       )
-      // --- तुमची Final Public Link ---
       ..loadRequest(Uri.parse('https://fee-register20262.ai.studio'));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            WebViewWidget(controller: controller),
-            if (isLoading) const Center(child: CircularProgressIndicator(color: Colors.deepOrange)),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (await controller.canGoBack()) {
+          controller.goBack();
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Stack(
+            children: [
+              WebViewWidget(controller: controller),
+              if (isLoading)
+                const Center(child: CircularProgressIndicator()),
+            ],
+          ),
         ),
       ),
     );
