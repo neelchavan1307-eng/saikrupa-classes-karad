@@ -1,7 +1,7 @@
 name: saikrupa_classes_karad
-description: Saikrupa Classes Karad - Professional App
+description: Saikrupa Classes Karad - Professional with Backup
 publish_to: 'none'
-version: 1.0.7+8
+version: 1.0.8+9
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -13,6 +13,7 @@ dependencies:
   share_plus: ^7.2.1
   path_provider: ^2.1.2
   image_picker: ^1.0.7
+  file_picker: ^8.1.0
 
 flutter:
   uses-material-design: true
