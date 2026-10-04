@@ -1,5 +1,5 @@
 name: saikrupa_classes_karad
-description: Saikrupa Classes Karad
+description: Saikrupa Classes Karad App with Receipt and WhatsApp
 publish_to: 'none'
 version: 1.0.4+5
 environment:
@@ -13,5 +13,3 @@ dependencies:
   share_plus: ^7.2.1
 flutter:
   uses-material-design: true
-  assets:
-    - assets/logo.png
