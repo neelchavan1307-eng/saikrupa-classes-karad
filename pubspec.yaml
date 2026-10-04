@@ -1,17 +1,17 @@
-1   name: saikrupa_classes_karad
-2   description: Saikrupa Classes Karad
-3   publish_to: 'none'
-4   version: 1.0.4+5
-5   environment:
-6     sdk: ">=3.0.0 <4.0.0"
-7   dependencies:
-8     flutter:
-9       sdk: flutter
-10    shared_preferences: ^2.2.2
-11    url_launcher: ^6.2.4
-12    image_picker: ^1.0.7
-13    share_plus: ^7.2.1
-14  flutter:
-15    uses-material-design: true
-16    assets:
-17      - assets/logo.png
+name: saikrupa_classes_karad
+description: Saikrupa Classes Karad
+publish_to: 'none'
+version: 1.0.4+5
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.2.2
+  url_launcher: ^6.2.4
+  image_picker: ^1.0.7
+  share_plus: ^7.2.1
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logo.png
