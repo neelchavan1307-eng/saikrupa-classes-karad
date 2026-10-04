@@ -1,4 +1,4 @@
-import 'dart:convert';
+2import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -276,4 +276,13 @@ class _S extends State<SaiKrupaPro> {
                 Text("Rs ${s.fee}", style: const TextStyle(fontWeight: FontWeight.bold))
               ]),
               const SizedBox(height: 6),
-              GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6, childAspectRatio: 1.7, crossAxisSpacing: 4, mainAxisSpacing: 4), itemCount: 12, itemBuilder: (c,m){ bool ok = s.paid.contains(m+1); return InkWell(onTap: (){ setState((){ if(ok) s.paid.remove(m+1); else s.paid.add(m+1); }); saveData(); }, child: Container(decoration: BoxDecoration(color: ok? Colors.green : const Color(0xFFFFCDD2), borderRadius: BorderRadius.circular(6)), child:
+              GridView.builder(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 6, childAspectRatio: 1.7, crossAxisSpacing: 4, mainAxisSpacing: 4), itemCount: 12, itemBuilder: (c,m){ bool ok = s.paid.contains(m+1); return InkWell(onTap: (){ setState((){ if(ok) s.paid.remove(m+1); else s.paid.add(m+1); }); saveData(); }, child: Container(decoration: BoxDecoration(color: ok? Colors.green : const Color(0xFFFFCDD2), borderRadius: BorderRadius.circular(6)), child: Center(child: Text(mL[m], style: TextStyle(color: ok? Colors.white: Colors.red, fontWeight: FontWeight.bold, fontSize: 11))))); }),
+              const SizedBox(height: 8), Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text("Paid Rs $paidAmt", style: const TextStyle(fontSize: 10)), Text("Bal Rs $bal", style: const TextStyle(fontSize: 10, color: Colors.red)), ElevatedButton(onPressed: ()=> genReceipt(s, DateTime.now().month-1), style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white, minimumSize: const Size(60,30)), child: const Text("पावती", style: TextStyle(fontSize: 10))), ElevatedButton(onPressed: ()=> genReceipt(s, DateTime.now().month-1), style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white, minimumSize: const Size(80,30)), child: const Text("Image WA", style: TextStyle(fontSize: 10)))])
+            ]))),
+          );
+        }),
+        const SizedBox(height: 80)
+      ])),
+    );
+  }
+}
