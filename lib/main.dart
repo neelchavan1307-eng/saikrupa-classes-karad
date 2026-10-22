@@ -39,7 +39,7 @@ class _DashboardState extends State<Dashboard>{
         int mm = m is int ? m : 0;
         if(mm>=1 && mm<=12) m12[mm-1]=1;
       }
-      return {"name":(b['n'] as String).trim(),"age":b['a'].toString(),"std":b['s'].toString(),"fee":b['f'],"mobile":"","months":m12};
+      return <String,dynamic>{"name":(b['n'] as String).trim(),"age":b['a'].toString(),"std":b['s'].toString(),"fee":b['f'],"mobile":"","months":m12};
     }).toList();
     _loadProfile();
   }
@@ -80,7 +80,7 @@ class _DashboardState extends State<Dashboard>{
     ));
   }
 
-  void openReceipt(Map s){
+  void openReceipt(Map<String,dynamic> s){
     List<int> months = List<int>.from(s['months']);
     int paidCount = months.where((e)=>e==1).length;
     if(paidCount==0) paidCount=1;
@@ -101,14 +101,16 @@ class _DashboardState extends State<Dashboard>{
   }
 
   Future<void> addNewStudent() async {
-    var newStud = await showDialog<Map>(context: context, builder: (_)=> AddStudentDialog());
-    if(newStud!=null){ setState(()=> students.add(newStud)); }
+    var result = await showDialog<dynamic>(context: context, builder: (_)=> AddStudentDialog());
+    if(result!=null && result is Map){ 
+      setState(()=> students.add(Map<String,dynamic>.from(result))); 
+    }
   }
 
   @override Widget build(BuildContext c){
     var filtered=students.where((s){
       if(search.isNotEmpty && !s['name'].toLowerCase().contains(search.toLowerCase())) return false;
-      bool hasB=s['months'].contains(0);
+      bool hasB=(s['months'] as List).contains(0);
       if(filter=="Baki" && !hasB) return false;
       if(filter=="Jama" && hasB) return false;
       return true;
@@ -119,7 +121,6 @@ class _DashboardState extends State<Dashboard>{
         Positioned.fill(child: Image.asset('assets/glass_bg.png',fit:BoxFit.cover, errorBuilder: (_,__,___)=> Container(color: Color(0xFFFFE6D5)))),
         Positioned.fill(child: Container(color: Colors.white.withOpacity(0.18))),
         SafeArea(child: Column(children:[
-          // PROFILE CARD - Tujya Photo Sarkha - Main.dart madhunch
           Container(
             margin: EdgeInsets.all(14),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(28), gradient: LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFE94057)])),
@@ -164,11 +165,11 @@ class _DashboardState extends State<Dashboard>{
                 subtitle: Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
                   Text("Vay: ${s['age']} • Std: ${s['std']} • Fee: ₹${s['fee']}",style:TextStyle(fontSize:11)),
                   SizedBox(height:5),
-                  Row(children: List.generate(12,(mi){ bool paid=s['months'][mi]==1; return Container(margin:EdgeInsets.only(right:2),width:16,height:16,decoration:BoxDecoration(color:paid?Colors.green:Colors.pink.shade100,borderRadius:BorderRadius.circular(4)),child: Center(child: Text(["J","F","M","A","M","J","J","A","S","O","N","D"][mi],style: TextStyle(fontSize:7,fontWeight:FontWeight.bold,color:paid?Colors.white:Colors.black54))));}))
+                  Row(children: List.generate(12,(mi){ bool paid=(s['months'] as List)[mi]==1; return Container(margin:EdgeInsets.only(right:2),width:16,height:16,decoration:BoxDecoration(color:paid?Colors.green:Colors.pink.shade100,borderRadius:BorderRadius.circular(4)),child: Center(child: Text(["J","F","M","A","M","J","J","A","S","O","N","D"][mi],style: TextStyle(fontSize:7,fontWeight:FontWeight.bold,color:paid?Colors.white:Colors.black54))));}))
                 ]),
                 trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                   IconButton(icon: Icon(Icons.receipt_long, color: Colors.green), onPressed: ()=> openReceipt(s)),
-                  IconButton(icon: Icon(Icons.edit, color: Colors.orange), onPressed: () async { var u= await Navigator.push(c,MaterialPageRoute(builder:(_)=>EditFull(student:s))); if(u!=null) setState((){ int idx=students.indexWhere((e)=>e['name']==s['name']); if(idx!=-1) students[idx]=u; }); }),
+                  IconButton(icon: Icon(Icons.edit, color: Colors.orange), onPressed: () async { var u= await Navigator.push(c,MaterialPageRoute(builder:(_)=>EditFull(student:s))); if(u!=null && u is Map) setState((){ int idx=students.indexWhere((e)=>e['name']==s['name']); if(idx!=-1) students[idx]=Map<String,dynamic>.from(u); }); }),
                 ]),
               ));
           })),
@@ -204,7 +205,7 @@ class _EditFullState extends State<EditFull>{
             Wrap(spacing:8,runSpacing:8,children: List.generate(12,(i){ bool p=months[i]==1; return GestureDetector(onTap:()=>setState(()=>months[i]=p?0:1),child: Container(width:60,padding:EdgeInsets.all(10),decoration:BoxDecoration(color:p?Colors.green:Colors.pink.shade100,borderRadius:BorderRadius.circular(12)),child: Column(children:[Text(["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i],style:TextStyle(fontSize:10,color:p?Colors.white:Colors.black)),Icon(p?Icons.check:Icons.close,size:14,color:p?Colors.white:Colors.pink)])));})),
           ])),
           SizedBox(height:20),
-          ElevatedButton(onPressed:(){ var u={"name":nameC.text,"age":ageC.text,"std":stdC.text,"fee":int.tryParse(feeC.text)??600,"mobile":mobileC.text,"months":months}; Navigator.pop(c,u); },style:ElevatedButton.styleFrom(backgroundColor:Colors.orange,minimumSize:Size(double.infinity,54)),child:Text("SAVE CHANGES",style:TextStyle(color:Colors.white,fontWeight:FontWeight.bold)))
+          ElevatedButton(onPressed:(){ var u=<String,dynamic>{"name":nameC.text,"age":ageC.text,"std":stdC.text,"fee":int.tryParse(feeC.text)??600,"mobile":mobileC.text,"months":months}; Navigator.pop(c,u); },style:ElevatedButton.styleFrom(backgroundColor:Colors.orange,minimumSize:Size(double.infinity,54)),child:Text("SAVE CHANGES",style:TextStyle(color:Colors.white,fontWeight:FontWeight.bold)))
         ])))
       ]),
     );
@@ -233,7 +234,7 @@ class _AddStudentDialogState extends State<AddStudentDialog>{
         TextButton(onPressed: ()=>Navigator.pop(c), child: Text("Cancel")),
         ElevatedButton(onPressed: (){
           if(nameC.text.trim().isEmpty){ ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text("नाव टाका"))); return; }
-          var s={"name":nameC.text.trim(),"age":ageC.text,"std":stdC.text,"fee":int.tryParse(feeC.text)??500,"mobile":mobC.text,"months":List.filled(12,0)};
+          var s=<String,dynamic>{"name":nameC.text.trim(),"age":ageC.text,"std":stdC.text,"fee":int.tryParse(feeC.text)??500,"mobile":mobC.text,"months":List.filled(12,0)};
           Navigator.pop(c, s);
         }, style: ElevatedButton.styleFrom(backgroundColor: Colors.orange), child: Text("Add करा", style: TextStyle(color: Colors.white)))
       ],
