@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'receipt_screen.dart'; // <-- HE ADD KELA
+import 'receipt_screen.dart';
 
 void main()=>runApp(const SaikrupaApp());
 class SaikrupaApp extends StatelessWidget{
@@ -30,7 +30,11 @@ class _DashboardState extends State<Dashboard>{
   @override void initState(){
     super.initState();
     students=backupRaw.map((b){
-      List<int> m12=List.filled(12,0); for(var m in b['p']){ if(m>=1&&m<=12) m12[m-1]=1; }
+      List<int> m12=List.filled(12,0);
+      for(var m in (b['p'] as List)){
+        int mm = m is int ? m : 0;
+        if(mm>=1 && mm<=12) m12[mm-1]=1;
+      }
       return {"name":(b['n'] as String).trim(),"age":b['a'].toString(),"std":b['s'].toString(),"fee":b['f'],"mobile":"","months":m12};
     }).toList();
   }
@@ -44,7 +48,6 @@ class _DashboardState extends State<Dashboard>{
     for(int i=0;i<12;i++) if(months[i]==1) paidM.add(mNames[i]);
     String monthStr = paidM.isEmpty ? "Not Paid" : paidM.join(", ");
     int totalAmt = paidCount * (s['fee'] as int);
-
     Navigator.push(context, MaterialPageRoute(builder: (_)=> ReceiptScreen(
       studentName: s['name'],
       amount: totalAmt.toString(),
@@ -93,7 +96,6 @@ class _DashboardState extends State<Dashboard>{
                   SizedBox(height:5),
                   Row(children: List.generate(12,(mi){ bool paid=s['months'][mi]==1; return Container(margin:EdgeInsets.only(right:2),width:16,height:16,decoration:BoxDecoration(color:paid?Colors.green:Colors.pink.shade100,borderRadius:BorderRadius.circular(4)),child: Center(child: Text(["J","F","M","A","M","J","J","A","S","O","N","D"][mi],style: TextStyle(fontSize:7,fontWeight:FontWeight.bold,color:paid?Colors.white:Colors.black54))));}))
                 ]),
-                // NAVIN - 2 Buttons: Edit + Receipt
                 trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                   IconButton(icon: Icon(Icons.receipt_long, color: Colors.green), onPressed: ()=> openReceipt(s)),
                   IconButton(icon: Icon(Icons.edit, color: Colors.orange), onPressed: () async { var u= await Navigator.push(c,MaterialPageRoute(builder:(_)=>EditFull(student:s))); if(u!=null) setState((){ int idx=students.indexWhere((e)=>e['name']==s['name']); if(idx!=-1) students[idx]=u; }); }),
@@ -117,7 +119,7 @@ class _EditFullState extends State<EditFull>{
   @override Widget build(BuildContext c){
     return Scaffold(
       body: Stack(children:[
-        Positioned.fill(child: Image.asset('assets/glass_bg.png',fit:BoxFit.cover)),
+        Positioned.fill(child: Image.asset('assets/glass_bg.png',fit:BoxFit.cover, errorBuilder: (_,__,___)=> Container(color: Colors.white))),
         Positioned.fill(child: Container(color:Colors.white.withOpacity(0.35))),
         SafeArea(child: SingleChildScrollView(padding:EdgeInsets.all(18),child: Column(children:[
           Container(padding:EdgeInsets.all(8),decoration:BoxDecoration(color:Colors.white.withOpacity(0.9),borderRadius:BorderRadius.circular(14)),child: Row(children:[IconButton(icon:Icon(Icons.arrow_back),onPressed:()=>Navigator.pop(c)),Text("VIDYARTHI EDIT",style:TextStyle(fontWeight:FontWeight.bold))])) ,
