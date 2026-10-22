@@ -1,22 +1,19 @@
 name: saikrupa_classes
-description: SAIKRUPA CLASSES - Morya Park, Sangodi Road, Yelwadi
+description: Saikrupa Classes
 publish_to: 'none'
-version: 2.1.0+1
+version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   shared_preferences: ^2.2.2
-  screenshot: ^3.0.0
-  path_provider: ^2.1.5
-  share_plus: ^10.0.2
   cupertino_icons: ^1.0.2
 
 flutter:
+  uses-material-design: true
   assets:
     - assets/logo.png
     - assets/glass_bg.png
-    - assets/saibaba_bg.jpg
