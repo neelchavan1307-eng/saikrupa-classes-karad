@@ -8,7 +8,7 @@ class SaikrupaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
+      theme: ThemeData(useMaterial3: true, fontFamily: 'Poppins'),
       home: const Dashboard(),
     );
   }
@@ -21,7 +21,6 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  // --- Tujha Saikrupa_Backup.json madhun load kelela data ---
   final List<Map> backupRaw = [
     {"n":"Vihan Tupe","a":9,"s":3,"f":600,"p":[7,8,9,1],"ph":null},
     {"n":"Krisha Kirme","a":10,"s":10,"f":1200,"p":[7,8,1],"ph":null},
@@ -45,12 +44,9 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    // Backup la aplya navin format madhe convert
     students = backupRaw.map((b) {
       List<int> months12 = List.filled(12, 0);
-      for (var m in b['p']) {
-        if (m >= 1 && m <= 12) months12[m-1] = 1;
-      }
+      for (var m in b['p']) { if (m >= 1 && m <= 12) months12[m-1] = 1; }
       return {
         "name": (b['n'] as String).trim(),
         "age": b['a'].toString(),
@@ -72,30 +68,51 @@ class _DashboardState extends State<Dashboard> {
       if (filter == "Jama" && hasBalance) return false;
       return true;
     }).toList();
-
     int totalPaid = students.fold(0, (sum, s) => sum + (s['months'] as List<int>).where((m)=>m==1).length * (s['fee'] as int));
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFF1E6),
       body: SafeArea(
         child: Column(children: [
-          // 3D HEADER WITH LOGO
+          // ===== PREMIUM 3D GLASS HEADER - NEW DESIGN =====
           Container(
-            height: 125, margin: const EdgeInsets.all(14), padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.85), borderRadius: BorderRadius.circular(28), border: Border.all(color: Colors.white, width: 2), boxShadow: [BoxShadow(color: Colors.orange.withOpacity(0.25), blurRadius: 22, offset: const Offset(0, 10))]),
-            child: Row(children: [
-              ClipRRect(borderRadius: BorderRadius.circular(20), child: Image.asset('assets/logo.png', width: 88, height: 88, fit: BoxFit.cover, errorBuilder: (_,__,___)=> const Icon(Icons.school, size: 50, color: Colors.orange))),
-              const SizedBox(width: 12),
-              const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text("॥ श्री साईनाथाय नमः ॥", style: TextStyle(fontSize: 9, color: Colors.brown, fontWeight: FontWeight.bold)),
-                Text("SAIKRUPA\nCLASSES", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, height: 1, color: Color(0xFF1E3A8A))),
-                Text("FAITH • DEVOTION • EDUCATION", style: TextStyle(fontSize: 7)),
-              ]))
+            height: 135,
+            margin: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(28),
+              gradient: const LinearGradient(colors: [Color(0xFF4A1A1A), Color(0xFF8B3A2A), Color(0xFFFFCDA2)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              boxShadow: [BoxShadow(color: Colors.orange.withOpacity(0.4), blurRadius: 25, offset: const Offset(0, 12))],
+              border: Border.all(color: Colors.white.withOpacity(0.6), width: 2),
+            ),
+            child: Stack(children: [
+              Positioned(right: -20, top: -20, child: Container(width: 80, height: 80, decoration: BoxDecoration(color: Colors.white.withOpacity(0.12), shape: BoxShape.circle))),
+              Positioned(right: 30, bottom: -25, child: Container(width: 120, height: 120, decoration: BoxDecoration(color: Colors.white.withOpacity(0.08), shape: BoxShape.circle))),
+              Row(children: [
+                Padding(padding: const EdgeInsets.all(12), child: Container(
+                  width: 92, height: 92,
+                  decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFFFD700), width: 3), boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 15)]),
+                  child: ClipOval(child: Image.asset('assets/logo.png', fit: BoxFit.cover, errorBuilder: (_,__,___)=> const Icon(Icons.school, size: 50, color: Colors.orange))),
+                )),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Stack(children: [
+                    Text("SAIKRUPA CLASSES", style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, foreground: Paint()..style=PaintingStyle.stroke..strokeWidth=3..color=Colors.black38)),
+                    const Text("SAIKRUPA CLASSES", style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, color: Color(0xFF1E3A8A), height: 1, shadows: [Shadow(color: Colors.black45, offset: Offset(2,3), blurRadius: 4)])),
+                  ]),
+                  const SizedBox(height: 4),
+                  const Text("FAITH • DEVOTION • EDUCATION", style: TextStyle(fontSize: 9, letterSpacing: 2.2, color: Color(0xFFFFD700), fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 2),
+                  const Text("॥ श्री साईनाथाय नमः ॥", style: TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.bold)),
+                ]))
+              ])
             ]),
           ),
-          // STATS
+
           Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: Row(children: [
-            _stat("${students.length}", "Vidyarthi"), _stat("₹$totalPaid", "Jama"), _stat("₹${students.length*12*600 - totalPaid}", "Baki"),
+            _stat("${students.length}", "Vidyarthi", Icons.groups_3),
+            const SizedBox(width: 8),
+            _stat("₹$totalPaid", "Jama", Icons.currency_rupee),
+            const SizedBox(width: 8),
+            _stat("₹${students.fold(0, (s, e) => s + (e['fee'] as int)*12) - totalPaid}", "Baki", Icons.wallet),
           ])),
           const SizedBox(height: 12),
           Padding(padding: const EdgeInsets.symmetric(horizontal: 14), child: TextField(onChanged: (v)=>setState(()=>search=v), decoration: InputDecoration(hintText: "Vihan, Krisha shodha...", prefixIcon: const Icon(Icons.search), filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)))),
@@ -109,34 +126,21 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget _stat(String v, String l) => Expanded(child: Container(margin: const EdgeInsets.only(right: 8), padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)), child: Column(children: [Text(v, style: const TextStyle(fontWeight: FontWeight.bold)), Text(l, style: const TextStyle(fontSize: 10))])));
+  Widget _stat(String v, String l, IconData ic) => Expanded(child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)), child: Column(children: [Icon(ic, size: 18, color: Colors.orange), const SizedBox(height: 2), Text(v, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)), Text(l, style: const TextStyle(fontSize: 10))])));
 
-  Widget _card(Map s) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-      child: ListTile(
-        onTap: () async {
-          var updated = await Navigator.push(context, MaterialPageRoute(builder: (_) => EditFull(student: s)));
-          if (updated != null) setState(() { int idx = students.indexWhere((e)=>e['name']==s['name']); if(idx!=-1) students[idx]=updated; });
-        },
-        leading: CircleAvatar(backgroundColor: Colors.orange.shade100, child: Text(s['name'][0].toUpperCase(), style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold))),
-        title: Text(s['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text("Vay: ${s['age']} • Std: ${s['std']} • Fee: ₹${s['fee']} • Mob: ${s['mobile'].isEmpty? 'No Number': s['mobile']}", style: const TextStyle(fontSize: 11)),
-          const SizedBox(height: 5),
-          Row(children: List.generate(12, (mi) {
-            bool paid = s['months'][mi]==1;
-            return Container(margin: const EdgeInsets.only(right: 2), width: 16, height: 16, decoration: BoxDecoration(color: paid? Colors.green: Colors.pink.shade100, borderRadius: BorderRadius.circular(4)), child: Center(child: Text(["J","F","M","A","M","J","J","A","S","O","N","D"][mi], style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: paid? Colors.white: Colors.black54))));
-          }))
-        ]),
-        trailing: const Icon(Icons.edit, color: Colors.orange, size: 20),
-      ),
-    );
-  }
+  Widget _card(Map s) => Container(margin: const EdgeInsets.only(bottom: 12), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)]), child: ListTile(
+    onTap: () async { var u = await Navigator.push(context, MaterialPageRoute(builder: (_) => EditFull(student: s))); if (u != null) setState(() { int idx = students.indexWhere((e)=>e['name']==s['name']); if(idx!=-1) students[idx]=u; }); },
+    leading: CircleAvatar(backgroundColor: Colors.orange.shade100, child: Text(s['name'][0].toUpperCase(), style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold))),
+    title: Text(s['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+    subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text("Vay: ${s['age']} • Std: ${s['std']} • Fee: ₹${s['fee']} • Mob: ${s['mobile'].isEmpty? 'No Number': s['mobile']}", style: const TextStyle(fontSize: 11)),
+      const SizedBox(height: 5),
+      Row(children: List.generate(12, (mi){ bool paid = s['months'][mi]==1; return Container(margin: const EdgeInsets.only(right: 2), width: 16, height: 16, decoration: BoxDecoration(color: paid? Colors.green: Colors.pink.shade100, borderRadius: BorderRadius.circular(4)), child: Center(child: Text(["J","F","M","A","M","J","J","A","S","O","N","D"][mi], style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: paid? Colors.white: Colors.black54))));}))
+    ]),
+    trailing: const Icon(Icons.edit, color: Colors.orange, size: 20),
+  ));
 }
 
-// FULL SCREEN EDIT - OPTION 1
 class EditFull extends StatefulWidget {
   final Map student; const EditFull({super.key, required this.student});
   @override State<EditFull> createState() => _EditFullState();
