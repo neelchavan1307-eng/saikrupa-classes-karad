@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'receipt_screen.dart';
 
 void main()=>runApp(const SaikrupaApp());
@@ -26,7 +27,10 @@ class _DashboardState extends State<Dashboard>{
     {"n":"Sanskruti","a":6,"s":6,"f":850,"p":[9]},
     {"n":"piyush","a":6,"s":3,"f":600,"p":[]}
   ];
-  late List<Map<String,dynamic>> students; String filter="Sarv"; String search="";
+  late List<Map<String,dynamic>> students; 
+  String filter="Sarv"; String search="";
+  String tName="प्रा. प्रदीप चव्हाण", tMobile="9822001122", tAddr="कराड, महाराष्ट्र";
+
   @override void initState(){
     super.initState();
     students=backupRaw.map((b){
@@ -37,6 +41,43 @@ class _DashboardState extends State<Dashboard>{
       }
       return {"name":(b['n'] as String).trim(),"age":b['a'].toString(),"std":b['s'].toString(),"fee":b['f'],"mobile":"","months":m12};
     }).toList();
+    _loadProfile();
+  }
+
+  _loadProfile() async {
+    var p=await SharedPreferences.getInstance();
+    setState((){
+      tName=p.getString('t_name')??"प्रा. प्रदीप चव्हाण";
+      tMobile=p.getString('t_mobile')??"9822001122";
+      tAddr=p.getString('t_addr')??"कराड, महाराष्ट्र";
+    });
+  }
+  _saveProfile() async {
+    var p=await SharedPreferences.getInstance();
+    await p.setString('t_name', tName);
+    await p.setString('t_mobile', tMobile);
+    await p.setString('t_addr', tAddr);
+  }
+
+  void editProfile(){
+    var nC=TextEditingController(text:tName);
+    var mC=TextEditingController(text:tMobile);
+    var aC=TextEditingController(text:tAddr);
+    showDialog(context: context, builder: (_)=> AlertDialog(
+      title: Text("माहिती बदला"),
+      content: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: nC, decoration: InputDecoration(labelText: "Teachers Name")),
+        TextField(controller: mC, decoration: InputDecoration(labelText: "Contact Number"), keyboardType: TextInputType.phone),
+        TextField(controller: aC, decoration: InputDecoration(labelText: "Address")),
+      ]),
+      actions: [
+        TextButton(onPressed: ()=>Navigator.pop(context), child: Text("Cancel")),
+        ElevatedButton(onPressed: (){
+          setState((){ tName=nC.text; tMobile=mC.text; tAddr=aC.text; });
+          _saveProfile(); Navigator.pop(context);
+        }, style: ElevatedButton.styleFrom(backgroundColor: Colors.orange), child: Text("Save", style: TextStyle(color: Colors.white)))
+      ],
+    ));
   }
 
   void openReceipt(Map s){
@@ -59,6 +100,11 @@ class _DashboardState extends State<Dashboard>{
     )));
   }
 
+  Future<void> addNewStudent() async {
+    var newStud = await showDialog<Map>(context: context, builder: (_)=> AddStudentDialog());
+    if(newStud!=null){ setState(()=> students.add(newStud)); }
+  }
+
   @override Widget build(BuildContext c){
     var filtered=students.where((s){
       if(search.isNotEmpty && !s['name'].toLowerCase().contains(search.toLowerCase())) return false;
@@ -67,20 +113,44 @@ class _DashboardState extends State<Dashboard>{
       if(filter=="Jama" && hasB) return false;
       return true;
     }).toList();
+
     return Scaffold(
       body: Stack(children:[
         Positioned.fill(child: Image.asset('assets/glass_bg.png',fit:BoxFit.cover, errorBuilder: (_,__,___)=> Container(color: Color(0xFFFFE6D5)))),
         Positioned.fill(child: Container(color: Colors.white.withOpacity(0.18))),
         SafeArea(child: Column(children:[
-          Container(height:128,margin:EdgeInsets.all(14),decoration:BoxDecoration(borderRadius:BorderRadius.circular(28),color:Colors.white.withOpacity(0.88),border:Border.all(color:Colors.white.withOpacity(0.9),width:2),boxShadow:[BoxShadow(color:Colors.black.withOpacity(0.12),blurRadius:20,offset:Offset(0,10))]),
-            child: Row(children:[
-              Padding(padding:EdgeInsets.all(12),child: Container(width:88,height:88,decoration:BoxDecoration(shape:BoxShape.circle,border:Border.all(color:Color(0xFFFFD700),width:3)),child: ClipOval(child: Image.asset('assets/logo.png',fit:BoxFit.cover,errorBuilder: (_,__,___)=>Icon(Icons.school,color:Colors.orange,size:40))))),
-              Expanded(child: Column(crossAxisAlignment:CrossAxisAlignment.start,mainAxisAlignment:MainAxisAlignment.center,children:[
-                Text("SAIKRUPA CLASSES",style: TextStyle(fontSize:20,fontWeight:FontWeight.w900,color:Color(0xFF1E3A8A))),
-                Text("FAITH • DEVOTION • EDUCATION",style: TextStyle(fontSize:9,letterSpacing:2,color:Color(0xFFB45309),fontWeight:FontWeight.bold)),
-                Text("॥ श्री साईनाथाय नमः ॥",style: TextStyle(fontSize:11,color:Colors.black54,fontWeight:FontWeight.bold)),
-              ]))
-            ])),
+          // PROFILE CARD - Tujya Photo Sarkha - Main.dart madhunch
+          Container(
+            margin: EdgeInsets.all(14),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(28), gradient: LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFE94057)])),
+            child: Column(children: [
+              Container(padding: EdgeInsets.symmetric(vertical:8), decoration: BoxDecoration(color: Color(0xFF4E2A0B), borderRadius: BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28))), child: Center(child: Text("सप्टेंबर २०२५ वर्ष (Sep 2025)", style: TextStyle(color: Colors.white, fontSize:12)))),
+              Container(
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.only(bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28))),
+                padding: EdgeInsets.all(16),
+                child: Column(children: [
+                  Container(width:80,height:80,decoration: BoxDecoration(shape: BoxShape.circle, color: Color(0xFFFFE4B5)), child: Icon(Icons.person, size:45, color: Colors.brown)),
+                  SizedBox(height:8),
+                  Text("SAIKRUPA CLASSES", style: TextStyle(fontSize:20, fontWeight: FontWeight.w900)),
+                  Text(tName, style: TextStyle(fontSize:16, color: Colors.red, fontWeight: FontWeight.bold)),
+                  SizedBox(height:10),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    ActionChip(label: Text("सेटिंग्स", style: TextStyle(fontSize:12)), onPressed: (){}),
+                    SizedBox(width:8),
+                    ElevatedButton(onPressed: editProfile, style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFE3F2FD), elevation:0), child: Text("माहिती बदला", style: TextStyle(fontSize:12, color: Colors.black)))
+                  ]),
+                  SizedBox(height:12),
+                  ElevatedButton.icon(onPressed: addNewStudent, icon: Icon(Icons.add, color: Colors.white), label: Text("+ नवीन विद्यार्थी", style: TextStyle(color: Colors.white, fontSize:16, fontWeight: FontWeight.bold)), style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF2E9E4A), padding: EdgeInsets.symmetric(horizontal:28, vertical:12), shape: StadiumBorder())),
+                  SizedBox(height:10),
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Icon(Icons.location_on, size:16), Flexible(child: Text(" $tAddr", style: TextStyle(fontWeight: FontWeight.bold, fontSize:12))),
+                    SizedBox(width:12),
+                    Icon(Icons.phone, size:16), Text(" $tMobile", style: TextStyle(fontWeight: FontWeight.bold, fontSize:12))
+                  ])
+                ]),
+              )
+            ]),
+          ),
           Padding(padding:EdgeInsets.symmetric(horizontal:14),child: TextField(onChanged:(v)=>setState(()=>search=v),decoration:InputDecoration(hintText:"Search students...",prefixIcon:Icon(Icons.search),filled:true,fillColor:Colors.white.withOpacity(0.9),border:OutlineInputBorder(borderRadius:BorderRadius.circular(16),borderSide:BorderSide.none)))),
           SizedBox(height:8),
           Padding(padding:EdgeInsets.symmetric(horizontal:14),child: Row(children: ["Sarv","Baki","Jama"].map((f)=>Padding(padding:EdgeInsets.only(right:8),child: ChoiceChip(label:Text(f),selected:filter==f,onSelected:(_)=>setState(()=>filter=f),selectedColor:Colors.orange.shade200,backgroundColor:Colors.white.withOpacity(0.85)))).toList())),
@@ -100,15 +170,15 @@ class _DashboardState extends State<Dashboard>{
                   IconButton(icon: Icon(Icons.receipt_long, color: Colors.green), onPressed: ()=> openReceipt(s)),
                   IconButton(icon: Icon(Icons.edit, color: Colors.orange), onPressed: () async { var u= await Navigator.push(c,MaterialPageRoute(builder:(_)=>EditFull(student:s))); if(u!=null) setState((){ int idx=students.indexWhere((e)=>e['name']==s['name']); if(idx!=-1) students[idx]=u; }); }),
                 ]),
-                onTap: () async { var u= await Navigator.push(c,MaterialPageRoute(builder:(_)=>EditFull(student:s))); if(u!=null) setState((){ int idx=students.indexWhere((e)=>e['name']==s['name']); if(idx!=-1) students[idx]=u; }); },
               ));
           })),
         ]))
       ]),
-      floatingActionButton: FloatingActionButton.extended(onPressed:(){},backgroundColor:Colors.orange,icon:Icon(Icons.add,color:Colors.white),label:Text("Navin",style:TextStyle(color:Colors.white))),
+      floatingActionButton: FloatingActionButton.extended(onPressed: addNewStudent, backgroundColor: Colors.orange, icon: Icon(Icons.add,color:Colors.white),label: Text("Navin",style:TextStyle(color:Colors.white))),
     );
   }
 }
+
 class EditFull extends StatefulWidget{
   final Map student; const EditFull({super.key,required this.student});
   @override State<EditFull> createState()=>_EditFullState();
@@ -137,6 +207,36 @@ class _EditFullState extends State<EditFull>{
           ElevatedButton(onPressed:(){ var u={"name":nameC.text,"age":ageC.text,"std":stdC.text,"fee":int.tryParse(feeC.text)??600,"mobile":mobileC.text,"months":months}; Navigator.pop(c,u); },style:ElevatedButton.styleFrom(backgroundColor:Colors.orange,minimumSize:Size(double.infinity,54)),child:Text("SAVE CHANGES",style:TextStyle(color:Colors.white,fontWeight:FontWeight.bold)))
         ])))
       ]),
+    );
+  }
+}
+
+class AddStudentDialog extends StatefulWidget{
+  @override State<AddStudentDialog> createState()=> _AddStudentDialogState();
+}
+class _AddStudentDialogState extends State<AddStudentDialog>{
+  var nameC=TextEditingController(); var feeC=TextEditingController(text:"500");
+  var ageC=TextEditingController(text:"6"); var stdC=TextEditingController(text:"1");
+  var mobC=TextEditingController();
+  @override Widget build(BuildContext c){
+    return AlertDialog(
+      title: Text("नवीन विद्यार्थी जोडा"),
+      content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        TextField(controller: nameC, decoration: InputDecoration(labelText: "नाव *", prefixIcon: Icon(Icons.person))),
+        SizedBox(height:8),
+        TextField(controller: ageC, decoration: InputDecoration(labelText: "वय")),
+        TextField(controller: stdC, decoration: InputDecoration(labelText: "इयत्ता")),
+        TextField(controller: feeC, decoration: InputDecoration(labelText: "Fee"), keyboardType: TextInputType.number),
+        TextField(controller: mobC, decoration: InputDecoration(labelText: "Mobile"), keyboardType: TextInputType.phone),
+      ])),
+      actions: [
+        TextButton(onPressed: ()=>Navigator.pop(c), child: Text("Cancel")),
+        ElevatedButton(onPressed: (){
+          if(nameC.text.trim().isEmpty){ ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text("नाव टाका"))); return; }
+          var s={"name":nameC.text.trim(),"age":ageC.text,"std":stdC.text,"fee":int.tryParse(feeC.text)??500,"mobile":mobC.text,"months":List.filled(12,0)};
+          Navigator.pop(c, s);
+        }, style: ElevatedButton.styleFrom(backgroundColor: Colors.orange), child: Text("Add करा", style: TextStyle(color: Colors.white)))
+      ],
     );
   }
 }
