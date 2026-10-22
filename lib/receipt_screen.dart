@@ -33,14 +33,11 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData!.buffer.asUint8List();
-
       final tempDir = await getTemporaryDirectory();
-      final file = await File('${tempDir.path}/receipt_${widget.studentName}_${monthC.text}.png').create();
+      final file = await File('${tempDir.path}/receipt_${widget.studentName}.png').create();
       await file.writeAsBytes(pngBytes);
-
-      String shareText = "SAIKRUPA CLASSES - Fee Receipt\nStudent: ${widget.studentName}\nMonth: ${monthC.text}\nAmount: Rs.${amountC.text}\nReceipt No: ${widget.receiptNo}\nThank You!";
-
-      await Share.shareXFiles([XFile(file.path)], text: shareText);
+      // ITHA TEXT PARAM NAHI - FAKT PHOTO!
+      await Share.shareXFiles([XFile(file.path)]);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
@@ -74,10 +71,10 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                       Text("Receipt No: ${widget.receiptNo}", style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       Text("Student: ${widget.studentName}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 12),
+                      Container(width: double.infinity, padding: const EdgeInsets.all(12), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)), child: Text("Month: ${monthC.text}", style: const TextStyle(fontSize: 15))),
                       const SizedBox(height: 8),
-                      Row(children: [const Text("Month: "), Expanded(child: TextField(controller: monthC, decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8))))]),
-                      const SizedBox(height: 8),
-                      Row(children: [const Text("Amount: Rs. "), Expanded(child: TextField(controller: amountC, keyboardType: TextInputType.number, decoration: const InputDecoration(border: OutlineInputBorder(), isDense: true, contentPadding: EdgeInsets.all(8))))]),
+                      Container(width: double.infinity, padding: const EdgeInsets.all(12), decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)), child: Text("Amount: Rs. ${amountC.text}", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
                       const SizedBox(height: 8),
                       Text("Paid Date: ${widget.paidDate}"),
                       Text("Joining: ${widget.joiningDate}"),
@@ -89,17 +86,10 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 12),
+            Row(children: [Expanded(child: TextField(controller: monthC, onChanged: (_) => setState(() {}), decoration: InputDecoration(labelText: "Mahina Badla", border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))))), const SizedBox(width: 10), Expanded(child: TextField(controller: amountC, onChanged: (_) => setState(() {}), keyboardType: TextInputType.number, decoration: InputDecoration(labelText: "Amount Badla", border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)))))]),
             const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton.icon(
-                onPressed: isSharing ? null : shareReceiptPhoto,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))),
-                icon: isSharing ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.share, color: Colors.white),
-                label: Text(isSharing ? "Photo banvat aahe..." : "WhatsApp var Photo Receipt Pathva - ${monthC.text}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ),
+            SizedBox(width: double.infinity, height: 54, child: ElevatedButton.icon(onPressed: isSharing ? null : shareReceiptPhoto, style: ElevatedButton.styleFrom(backgroundColor: Colors.green, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))), icon: isSharing ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.share, color: Colors.white), label: Text(isSharing ? "Photo banvat aahe..." : "WhatsApp var Photo Pathva", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
           ],
         ),
       ),
