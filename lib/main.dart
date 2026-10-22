@@ -29,7 +29,7 @@ class _DashboardState extends State<Dashboard>{
   ];
   late List<Map<String,dynamic>> students; 
   String filter="Sarv"; String search="";
-  String tName="प्रा. प्रदीप चव्हाण", tMobile="9822001122", tAddr="कराड, महाराष्ट्र";
+  String tName="टीचर-स्नेहल चव्हाण", tMobile="9822001122", tAddr="मोरया पार्क, सांगोडी रोड, येलवाडी.";
 
   @override void initState(){
     super.initState();
@@ -47,9 +47,9 @@ class _DashboardState extends State<Dashboard>{
   _loadProfile() async {
     var p=await SharedPreferences.getInstance();
     setState((){
-      tName=p.getString('t_name')??"प्रा. प्रदीप चव्हाण";
+      tName=p.getString('t_name')??"टीचर-स्नेहल चव्हाण";
       tMobile=p.getString('t_mobile')??"9822001122";
-      tAddr=p.getString('t_addr')??"कराड, महाराष्ट्र";
+      tAddr=p.getString('t_addr')??"मोरया पार्क, सांगोडी रोड, येलवाडी.";
     });
   }
   _saveProfile() async {
@@ -121,16 +121,23 @@ class _DashboardState extends State<Dashboard>{
         Positioned.fill(child: Image.asset('assets/glass_bg.png',fit:BoxFit.cover, errorBuilder: (_,__,___)=> Container(color: Color(0xFFFFE6D5)))),
         Positioned.fill(child: Container(color: Colors.white.withOpacity(0.18))),
         SafeArea(child: Column(children:[
+          // PROFILE CARD
           Container(
             margin: EdgeInsets.all(14),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(28), gradient: LinearGradient(colors: [Color(0xFFFF8C00), Color(0xFFE94057)])),
             child: Column(children: [
-              Container(padding: EdgeInsets.symmetric(vertical:8), decoration: BoxDecoration(color: Color(0xFF4E2A0B), borderRadius: BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28))), child: Center(child: Text("सप्टेंबर २०२५ वर्ष (Sep 2025)", style: TextStyle(color: Colors.white, fontSize:12)))),
+              // YEAR 2026 - FACT HECH
+              Container(padding: EdgeInsets.symmetric(vertical:8), decoration: BoxDecoration(color: Color(0xFF4E2A0B), borderRadius: BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28))), child: Center(child: Text("वर्ष 2026", style: TextStyle(color: Colors.white, fontSize:14, fontWeight: FontWeight.bold)))),
               Container(
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.only(bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28))),
                 padding: EdgeInsets.all(16),
                 child: Column(children: [
-                  Container(width:80,height:80,decoration: BoxDecoration(shape: BoxShape.circle, color: Color(0xFFFFE4B5)), child: Icon(Icons.person, size:45, color: Colors.brown)),
+                  // LOGO - PERSON ICON JAGI LOGO
+                  Container(
+                    width:90,height:90,
+                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.orange, width:3), color: Colors.white),
+                    child: ClipOval(child: Image.asset('assets/logo.png', fit: BoxFit.cover, errorBuilder: (_,__,___)=> Icon(Icons.school, size:45, color: Colors.orange))),
+                  ),
                   SizedBox(height:8),
                   Text("SAIKRUPA CLASSES", style: TextStyle(fontSize:20, fontWeight: FontWeight.w900)),
                   Text(tName, style: TextStyle(fontSize:16, color: Colors.red, fontWeight: FontWeight.bold)),
@@ -173,6 +180,13 @@ class _DashboardState extends State<Dashboard>{
                 ]),
               ));
           })),
+          // WATERMARK - MADE BY PRADIP CHAVAN
+          Container(
+            width: double.infinity,
+            color: Colors.black.withOpacity(0.05),
+            padding: EdgeInsets.symmetric(vertical:6),
+            child: Center(child: Text("Made by Pradip Chavan ✨", style: TextStyle(fontSize:11, color: Colors.black54, fontWeight: FontWeight.w600, letterSpacing: 0.5))),
+          )
         ]))
       ]),
       floatingActionButton: FloatingActionButton.extended(onPressed: addNewStudent, backgroundColor: Colors.orange, icon: Icon(Icons.add,color:Colors.white),label: Text("Navin",style:TextStyle(color:Colors.white))),
