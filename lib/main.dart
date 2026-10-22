@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'receipt_screen.dart'; // <-- HE ADD KELA
+
 void main()=>runApp(const SaikrupaApp());
 class SaikrupaApp extends StatelessWidget{
   const SaikrupaApp({super.key});
@@ -32,6 +34,28 @@ class _DashboardState extends State<Dashboard>{
       return {"name":(b['n'] as String).trim(),"age":b['a'].toString(),"std":b['s'].toString(),"fee":b['f'],"mobile":"","months":m12};
     }).toList();
   }
+
+  void openReceipt(Map s){
+    List<int> months = List<int>.from(s['months']);
+    int paidCount = months.where((e)=>e==1).length;
+    if(paidCount==0) paidCount=1;
+    List<String> mNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    List<String> paidM = [];
+    for(int i=0;i<12;i++) if(months[i]==1) paidM.add(mNames[i]);
+    String monthStr = paidM.isEmpty ? "Not Paid" : paidM.join(", ");
+    int totalAmt = paidCount * (s['fee'] as int);
+
+    Navigator.push(context, MaterialPageRoute(builder: (_)=> ReceiptScreen(
+      studentName: s['name'],
+      amount: totalAmt.toString(),
+      joiningDate: "01/06/2024",
+      paidDate: "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+      monthPaid: monthStr,
+      mode: "Cash",
+      receiptNo: "SK${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}"
+    )));
+  }
+
   @override Widget build(BuildContext c){
     var filtered=students.where((s){
       if(search.isNotEmpty && !s['name'].toLowerCase().contains(search.toLowerCase())) return false;
@@ -42,7 +66,7 @@ class _DashboardState extends State<Dashboard>{
     }).toList();
     return Scaffold(
       body: Stack(children:[
-        Positioned.fill(child: Image.asset('assets/glass_bg.png',fit:BoxFit.cover)),
+        Positioned.fill(child: Image.asset('assets/glass_bg.png',fit:BoxFit.cover, errorBuilder: (_,__,___)=> Container(color: Color(0xFFFFE6D5)))),
         Positioned.fill(child: Container(color: Colors.white.withOpacity(0.18))),
         SafeArea(child: Column(children:[
           Container(height:128,margin:EdgeInsets.all(14),decoration:BoxDecoration(borderRadius:BorderRadius.circular(28),color:Colors.white.withOpacity(0.88),border:Border.all(color:Colors.white.withOpacity(0.9),width:2),boxShadow:[BoxShadow(color:Colors.black.withOpacity(0.12),blurRadius:20,offset:Offset(0,10))]),
@@ -69,7 +93,11 @@ class _DashboardState extends State<Dashboard>{
                   SizedBox(height:5),
                   Row(children: List.generate(12,(mi){ bool paid=s['months'][mi]==1; return Container(margin:EdgeInsets.only(right:2),width:16,height:16,decoration:BoxDecoration(color:paid?Colors.green:Colors.pink.shade100,borderRadius:BorderRadius.circular(4)),child: Center(child: Text(["J","F","M","A","M","J","J","A","S","O","N","D"][mi],style: TextStyle(fontSize:7,fontWeight:FontWeight.bold,color:paid?Colors.white:Colors.black54))));}))
                 ]),
-                trailing: Icon(Icons.edit,color:Colors.orange,size:20),
+                // NAVIN - 2 Buttons: Edit + Receipt
+                trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                  IconButton(icon: Icon(Icons.receipt_long, color: Colors.green), onPressed: ()=> openReceipt(s)),
+                  IconButton(icon: Icon(Icons.edit, color: Colors.orange), onPressed: () async { var u= await Navigator.push(c,MaterialPageRoute(builder:(_)=>EditFull(student:s))); if(u!=null) setState((){ int idx=students.indexWhere((e)=>e['name']==s['name']); if(idx!=-1) students[idx]=u; }); }),
+                ]),
                 onTap: () async { var u= await Navigator.push(c,MaterialPageRoute(builder:(_)=>EditFull(student:s))); if(u!=null) setState((){ int idx=students.indexWhere((e)=>e['name']==s['name']); if(idx!=-1) students[idx]=u; }); },
               ));
           })),
