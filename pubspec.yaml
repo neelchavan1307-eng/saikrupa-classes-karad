@@ -1,7 +1,7 @@
 name: saikrupa_classes
 description: Saikrupa Classes - Student Fees Management
 publish_to: 'none'
-version: 1.0.0+8
+version: 1.0.0+9
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -13,6 +13,7 @@ dependencies:
   shared_preferences: ^2.2.2
   share_plus: ^10.0.0
   path_provider: ^2.1.2
+  file_picker: ^8.1.0
 
 dev_dependencies:
   flutter_test:
