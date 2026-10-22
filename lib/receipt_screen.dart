@@ -1,11 +1,8 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ReceiptScreen extends StatefulWidget {
   final String studentName, amount, joiningDate, paidDate, monthPaid, mode, receiptNo;
@@ -14,70 +11,69 @@ class ReceiptScreen extends StatefulWidget {
 }
 
 class _ReceiptScreenState extends State<ReceiptScreen> {
-  GlobalKey _key = GlobalKey();
-  bool loading=false;
-  String tAddr="कराड, महाराष्ट्र", tMobile="9822001122", tName="प्रा. प्रदीप चव्हाण";
-
-  @override void initState(){ super.initState(); _load(); }
-  _load() async {
-    var p=await SharedPreferences.getInstance();
-    setState((){
-      tAddr=p.getString('t_addr')??"कराड, महाराष्ट्र";
-      tMobile=p.getString('t_mobile')??"9822001122";
-      tName=p.getString('t_name')??"प्रा. प्रदीप चव्हाण";
-    });
-  }
+  final ScreenshotController ssController = ScreenshotController();
 
   Future<void> shareImage() async {
-    setState(()=> loading=true);
-    try{
-      RenderRepaintBoundary b = _key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      ui.Image img = await b.toImage(pixelRatio: 3.0);
-      ByteData? bd = await img.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List bytes = bd!.buffer.asUint8List();
-      final dir = await getTemporaryDirectory();
-      final file = await File('${dir.path}/Receipt_${widget.receiptNo}.png').create();
-      await file.writeAsBytes(bytes);
-      // FAKT PHOTO - KHALCHA TEXT NAHI
-      await Share.shareXFiles([XFile(file.path)]);
-    }catch(e){ ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); }
-    setState(()=> loading=false);
+    final bytes = await ssController.capture();
+    if (bytes == null) return;
+    final dir = await getTemporaryDirectory();
+    final file = await File('${dir.path}/receipt_${widget.receiptNo}.png').create();
+    await file.writeAsBytes(bytes);
+    await Share.shareXFiles([XFile(file.path)], text: "Saikrupa Classes - Fee Receipt - ${widget.studentName}");
   }
 
-  @override Widget build(BuildContext context){
+  @override Widget build(BuildContext c) {
     return Scaffold(
-      backgroundColor: Color(0xFFFFFEF5),
-      appBar: AppBar(title: Text("Fee Receipt"), backgroundColor: Color(0xFF0A2351), foregroundColor: Colors.white),
-      body: SingleChildScrollView(padding: EdgeInsets.all(12), child: Column(children: [
-        RepaintBoundary(
-          key: _key,
-          child: Container(decoration: BoxDecoration(color: Colors.white, border: Border.all(color: Color(0xFFD4AF37), width:3), borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.all(16), child: Column(children: [
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Container(width:75,height:75,decoration:BoxDecoration(shape:BoxShape.circle,border:Border.all(color: Color(0xFFD4AF37),width:2)),child: ClipOval(child: Image.asset('assets/logo.png', fit:BoxFit.cover, errorBuilder: (_,__,___)=> Icon(Icons.school,size:40,color:Colors.orange)))),
-              SizedBox(width:10),
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text("SAIKRUPA",style: TextStyle(fontSize:20,fontWeight:FontWeight.w900,color:Color(0xFF0A2351))),
-                Text("CLASSES",style: TextStyle(fontSize:12,letterSpacing:3,color:Color(0xFF8B5E3C),fontWeight:FontWeight.bold)),
-                Text("॥ श्री साईनाथाय नमः ॥",style: TextStyle(fontSize:10,color:Colors.orange)),
-              ])
-            ]),
-            SizedBox(height:10),
-            Text("FEE RECEIPT",style: TextStyle(fontSize:24,fontWeight:FontWeight.bold,color:Color(0xFF8B5E3C))),
-            SizedBox(height:8),
-            Container(width:double.infinity,color:Color(0xFF0A2351),padding:EdgeInsets.all(8),child: Column(children:[
-              Text("SAIKRUPA CLASSES - Faith Devotion Education",textAlign:TextAlign.center,style:TextStyle(color:Color(0xFFD4AF37),fontWeight:FontWeight.bold,fontSize:11)),
-              SizedBox(height:3),
-              Text("$tAddr | Mob: $tMobile | $tName",textAlign:TextAlign.center,style:TextStyle(color:Colors.white,fontSize:9)),
-            ])),
-            SizedBox(height:14),
-            _r("Receipt No:",widget.receiptNo), _r("Student:",widget.studentName), _r("Amount:","Rs. ${widget.amount}"), _r("Month:",widget.monthPaid), _r("Paid Date:",widget.paidDate), _r("Joining:",widget.joiningDate), _r("Mode:",widget.mode),
-            SizedBox(height:10),
-            Container(width:double.infinity,padding:EdgeInsets.all(10),decoration:BoxDecoration(color:Color(0xFFE6F0FF),borderRadius:BorderRadius.circular(8)),child: Text("Total Paid: Rs. ${widget.amount} - Paid in Full",style:TextStyle(fontWeight:FontWeight.bold,color:Color(0xFF0A2351)),textAlign:TextAlign.center)),
-          ]))),
-        SizedBox(height:18),
-        SizedBox(width:double.infinity,height:52,child: ElevatedButton.icon(onPressed: loading?null:shareImage, icon: loading?SizedBox(width:18,height:18,child:CircularProgressIndicator(color:Colors.white,strokeWidth:2)):Icon(Icons.share, color: Colors.white), label: Text(loading?"Banvatoy...":"WhatsApp वर फोटो रिसिप्ट पाठवा",style:TextStyle(color:Colors.white,fontWeight:FontWeight.bold)), style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF25D366),shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(12))))),
-      ])),
+      appBar: AppBar(title: Text("Fee Receipt"), backgroundColor: Color(0xFF1A2A4A), foregroundColor: Colors.white),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(children: [
+          Screenshot(
+            controller: ssController,
+            child: Container(
+              padding: EdgeInsets.all(14),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Color(0xFFD4AF37), width: 2.5)),
+              child: Column(children: [
+                Row(children: [
+                  Container(width: 65, height: 65, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Color(0xFFD4AF37))), child: ClipOval(child: Image.asset('assets/logo.png', errorBuilder: (_, __, ___) => Icon(Icons.school)))),
+                  SizedBox(width: 10),
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text("SAIKRUPA", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF1A2A4A))),
+                    Text("CLASSES", style: TextStyle(fontSize: 13, letterSpacing: 3, color: Colors.brown)),
+                    Text("॥ श्री साईनाथाय नमः ॥", style: TextStyle(fontSize: 10, color: Colors.orange)),
+                  ])
+                ]),
+                SizedBox(height: 10),
+                Text("FEE RECEIPT", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF8B5E3C))),
+                SizedBox(height: 10),
+                // ORANGE CIRCLE WALA TEXT KADHLA - FACTA EKACH LINE THEVLI
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  color: Color(0xFF1A2A4A),
+                  child: Center(child: Text("SAIKRUPA CLASSES - Faith Devotion Education", style: TextStyle(color: Color(0xFFD4AF37), fontSize: 12, fontWeight: FontWeight.bold))),
+                ),
+                SizedBox(height: 14),
+                _row("Receipt No:", widget.receiptNo, bold: true),
+                _row("Student:", widget.studentName, bold: true),
+                _row("Amount:", "Rs. ${widget.amount}"),
+                _row("Month:", widget.monthPaid),
+                _row("Paid Date:", widget.paidDate),
+                _row("Joining:", widget.joiningDate),
+                _row("Mode:", widget.mode),
+                SizedBox(height: 14),
+                Container(width: double.infinity, padding: EdgeInsets.all(12), decoration: BoxDecoration(color: Color(0xFFEAF1FF), borderRadius: BorderRadius.circular(10)), child: Center(child: Text("Total Paid: Rs. ${widget.amount} - Paid in Full", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A2A4A))))),
+              ]),
+            ),
+          ),
+          SizedBox(height: 18),
+          SizedBox(width: double.infinity, height: 56, child: ElevatedButton.icon(onPressed: shareImage, icon: Icon(Icons.share, color: Colors.white), label: Text("WhatsApp वर फोटो रिसिप्ट पाठवा", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF25D366), shape: StadiumBorder()))),
+        ]),
+      ),
     );
   }
-  Widget _r(String t,String v)=> Padding(padding: EdgeInsets.symmetric(vertical:3), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(t,style:TextStyle(color:Colors.black54,fontSize:12)), Flexible(child: Text(v,style:TextStyle(fontWeight:FontWeight.bold,fontSize:12), textAlign: TextAlign.right))]));
+
+  Widget _row(String l, String v, {bool bold = false}) {
+    return Padding(padding: EdgeInsets.symmetric(vertical: 4), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(l, style: TextStyle(color: Colors.black54, fontSize: 13)), Text(v, style: TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.w500, fontSize: 13))]));
+  }
 }
